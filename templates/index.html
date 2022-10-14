@@ -51,7 +51,7 @@
             <div class="col-5 jumbotron p-2 mx-1">
 
                 <p>Add Signal</p>
-    
+
                 <form action="/action_page.php">
                     <input type="file" id="myFile" name="filename">
                     <input type="submit">
@@ -95,121 +95,17 @@
     <br>
     <br>
 
-<br /><br />
-Sample frequency:
-<input id="fsval" type="text" value="">
-<input type="range" id="range" size="5" min="0.01" max="2.1" value="0.5" step=".01" />
-<br />
-<p id="output"> </p>
+    <br /><br />
+    Sample frequency:
+    <input id="fsval" type="text" value="">
+    <input type="range" id="range" size="5" min="0.01" max="2.1" value="0.5" step=".01" />
+    <br />
+    <p id="output"> </p>
 
-<div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
-<div id="container2" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+    <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+    <div id="container2" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
 
 
-    
-    <script>
-
-        var x_max = 100;
-        var chart;
-
-        function requestData(){
-            var requests = $.get('/data');
-            var tm = requests.done(function (result){
-                var series = char.series[0],
-                    shift = series.data.length >20;
-                char.series[0].setData(result, true, shift);
-                setTimeout(requestData, 1000);
-            });
-        }
-
-        chart= new Highcharts.Chart({
-            chart:
-            {
-                renderTo: 'container',
-                type: 'line',
-                marginRight: 130,
-                marginBottom: 25,
-                zoomType: "x",
-                events: {
-                    load: requestData
-                }
-            },
-            title:
-            {
-                text: 'Signal Data',
-                x : -20
-            },
-            xAxis: {
-                title: {
-                    text: 'Time (ms)',
-                    margin: 80
-                }
-            },
-            yAxis: {
-                title: {
-                    text: 'Amplitude',
-                    margin: 80
-                }
-            },
-            series: [{
-                name: 'Sine Wave Values',
-                color: 'rgba(40, 120, 120, 0.5)',
-                data: calculate(),
-                turboThreshold: 0
-            },
-                    {
-                        name: 'Sampled Wave Values',
-                        color: 'rgba(255, 0, 0, 1)',
-                        data: calculateSampled(),
-                        turboThreshold: 0
-                    }]
-    })
-
-    function calculateY(x) {
-            return Math.sin(x);
-        }
-    function calculateSampled() {
-            var v = [];
-            for (var xt = 0; xt <= x_max; xt += 1 / getRate()) {
-                v.push({ x: xt, y: calculateY(xt) });
-            }
-            return v;
-        }
-    
-    function calculate() {
-            var v = [];
-            for (var xt = 0; xt <= x_max; xt += .01) {
-                v.push({ x: xt, y: calculateY(xt) });
-            }
-            return v;
-        }
-    
-    function getRate() {
-            return (+$("#range").val());
-        }
-    
-    function plot() {
-            chart.series[1].setData(calculateSampled());
-        }
-
-    $('#range').change(update);
-
-    $("#fsval").change(function () {
-        var val = $(this).val();
-        val = Math.min(Math.max(val, $('#range').attr('min')), $('#range').attr('max'));
-        $("#range").val(val);
-        update();
-        $(this).val(val);
-    });
-
-    function update() {
-        $("#fsval").val(getRate());
-        plot();
-    }
-
-    update();    
-
-    </script>
+    <script src="/script/main.js"></script>
 
 </body>
-
