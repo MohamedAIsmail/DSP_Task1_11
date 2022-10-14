@@ -1,0 +1,36 @@
+body {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+#container {
+    border: 1px solid #000;
+    border-radius: 30px;
+    padding: 10px;
+    box-shadow: 10px 10px 5px 2px rgba(0, 0, 0, 0.5);
+    min-width: 400px;
+    height: 400px;
+    margin: 10px 20px;
+}
+
+
+.jumbotron {
+    widows: 150px;
+    height: 220px;
+    justify-content: center;
+}
+
+.row {
+    justify-content: center;
+}
+
+.control {
+    display: flex;
+    justify-content: space-between;
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 20px;
+    margin: 20px;
+    flex-wrap: wrap;
+}
