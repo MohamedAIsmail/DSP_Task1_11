@@ -1,9 +1,6 @@
+var x_max = 50;
 
-var x_max = 100;
-var chart;
-
-
-chart = new Highcharts.Chart({
+let chart = new Highcharts.Chart({
     chart:
     {
         renderTo: 'container',
@@ -71,14 +68,6 @@ function plot() {
 }
 
 $('#range').change(update);
-
-$("#fsval").change(function () {
-    var val = $(this).val();
-    val = Math.min(Math.max(val, $('#range').attr('min')), $('#range').attr('max'));
-    $("#range").val(val);
-    update();
-    $(this).val(val);
-});
 
 function update() {
     $("#fsval").val(getRate());
