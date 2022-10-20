@@ -1,8 +1,19 @@
+""""
+TODO
+moshkla any lazm a3ml view abl mmsah
+a3ml separate plots 
+"""
+
+
 from fileinput import filename
 from turtle import title
+from click import option
+from pyparsing import col
 from scipy import signal, interpolate
 from scipy.interpolate import interp1d,  BarycentricInterpolator
 import scipy.fft
+import math
+
 
 import streamlit.components.v1 as components
 from streamlit_elements import elements, mui, html, dashboard
@@ -15,6 +26,7 @@ import scipy as sc
 import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+from plotly.subplots import make_subplots
 
 
 st.set_page_config(page_title="Sampling Studio",
@@ -61,6 +73,7 @@ def SignalPlotting(df):
         fig.add_trace(go.Scatter(x=Time, y=Amplitude,
                                  mode='lines', name='Signal Plot'))
 
+
     # ----------------------- Calculating Sampled frequency according to the points chosen -----------------------------
 
         maximumFrequencyRatio = round(SamplingRate)
@@ -86,6 +99,59 @@ def SignalPlotting(df):
                 x=Time, y=interpolatedAmp(Time), line=dict(color='firebrick')))
             st.write(fig2)
 
+# ----------------------- plot any signal ------------------------------
+
+# def plotanysig(x,y,z):
+    
+#     plot = px.line(x= x,y=y,title=z)
+#     st.plotly_chart(plot)
+
+
+# ----------------------- Function of plotting the composed signal ------------------------------
+
+def signalplotter(sig,t,z):
+    plot = px.line(x= t,y=sig,title=z)
+    st.plotly_chart(plot)
+   
+
+# ----------------------- Function of plotting the summed signal ------------------------------
+
+def summedsignal(t):
+    ysum=0
+    for i in range(len(st.session_state.sigparameters)):
+        ysum += st.session_state.sigparameters[i][0] * np.sin(2 * np.pi * st.session_state.sigparameters[i][1] * t + st.session_state.sigparameters[i][2] )
+    return ysum
+
+
+
+#----------------------- find selected signal----------------------------------
+def findsig(name):
+    for i in range(len(st.session_state.sigparameters)):
+        if name == st.session_state.sigparameters[i][3]:
+            return st.session_state.sigparameters[i]
+
+#----------------------- delete selected signal----------------------------------
+def delsig(name):
+    for i in range(len(st.session_state.sigparameters)):
+        if name == st.session_state.sigparameters[i][3]:
+            return i
+
+#---------------------- handle click -------------------------------------------
+def handle_click(name):  
+
+    if name != None:
+
+        indx =delsig(name)
+        st.session_state.sigparameters.remove(st.session_state.sigparameters[indx])    
+#---------------------- view selected signal-------------------------------------------
+
+def view_selected_signal():
+
+    if signalselect != None:
+        sigpar = findsig(signalselect)
+        sig = sigpar[0] * np.sin(2 * np.pi * sigpar[1]  * t + sigpar[2]  )
+        # signalplotter(sig,t,'the selected signal')
+        ax[0].plot(t, sig)
 
 # Transforming Signal to Frequency Domain to Capture Value of Maximum Frequency
 
@@ -115,7 +181,7 @@ def ResampleSignal(self, timeReadings, amplitudeReadings, maximumFrequencyRatio)
 
 
 options = st.sidebar.radio(
-    'Pages', options=['Signal Plotting', 'Sampling Signal'])
+    'Pages', options=['Signal Plotting', 'Sampling Signal','sinusoidal composer'])
 
 
 if uploaded_Signal:
@@ -123,5 +189,91 @@ if uploaded_Signal:
     if options == 'Signal Plotting':
         SignalPlotting(df)
 
+    
+
+  
+
+if options == 'sinusoidal composer':
+    
+    # st.session_state
+    if 'sigparameters' not in st.session_state:
+         st.session_state['sigparameters']=[]
+    if 'a_count' not in st.session_state:
+        st.session_state['a_count']=0
+
+    col1, col2 = st.columns([3, 1])
+
+    fig, ax = plt.subplots(2)
+
+
+
+    with col2:
+
+        with st.form('sinusode composer'):
+            t = np.linspace(-2, 2, 10000)
+            freq = st.number_input('frequency', min_value=0.0, max_value=60.0, step=1.0)
+            amp = st.number_input('amplitude' ,step=1.0)
+            phi = st.number_input('phase', min_value = -2 * np.pi, max_value = 2 * np.pi, step=np.pi,value=0.0)
+            view = st.form_submit_button('view')
+            addsig = st.form_submit_button('add')
+            
+  
+
+
+    with col1:
+        
+        if view:            
+            sig=amp * np.sin(2 * np.pi * freq * t + phi )
+            # signalplotter(sig,t,'the composed signal')
+            ax[0].plot(t, sig)
+
+
+        if addsig:
+            st.session_state.a_count += 1
+            name= 'signal ' + str(st.session_state.a_count)  
+
+            signal=[amp,freq,phi,name]
+            st.session_state.sigparameters.append(signal)
+            print(st.session_state.sigparameters)
+            # signalplotter(summedsignal(t),t,'the summed signal')
+            ax[1].plot(t, summedsignal(t))
+
+
+
+    with col2:
+        # if addsig or (view and len(st.session_state.sigparameters)):
+            # with st.form('sinusode selection'):
+            slct=[]
+            for i in range(len(st.session_state.sigparameters)):
+                slct.append(st.session_state.sigparameters[i][3])  
+
+            signalselect = st.selectbox('select a signal',slct, on_change =view_selected_signal)
+            
+            # viewslct = st.form_submit_button('view')
+
+
+            deletesig = st.button('delete', on_click = handle_click, args = (signalselect,))
+
+    with col1:
+            
+        view_selected_signal()
+        # if viewslct:
+        # if signalselect != None:
+        #     sigpar = findsig(signalselect)
+        #     sig = sigpar[0] * np.sin(2 * np.pi * sigpar[1]  * t + sigpar[2]  )
+        #     # signalplotter(sig,t,'the selected signal')
+        #     ax[0].plot(t, sig)
+
+
+        if deletesig:
+            if signalselect != None:
+
+                
+                if(len(st.session_state.sigparameters)):
+                    # signalplotter(summedsignal(t),t,'the summed signal')
+                    ax[1].plot(t, summedsignal(t))
+
+
+    st.plotly_chart(fig)
 
 # ----------------------- Plotting Sampled Signal ----------------------------------
