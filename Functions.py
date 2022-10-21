@@ -1,13 +1,9 @@
 from time import time
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-import plotly.express as px
 import streamlit as st  # 🎈 data web app development
 import pandas as pd  # read csv, df manipulation
-from array import array
-from scipy import signal
 import scipy.fft
-
 import numpy as np  # np mean, np random
 
 
@@ -47,7 +43,6 @@ def signalReconstructing(time_Points, sampledTime, sampledAmplitude):
 
     # The following equations is according to White- Shannon interpoltion formula ((t - nT)/T)
     K = (TimeMatrix.T - sampledTime) / (sampledTime[1] - sampledTime[0]) # Transpose for TimeMatrix is a must for proper calculations (broadcasting)
-
 
     # Reconstructed Amplitude = x[n] sinc(v) -- Whitetaker Shannon
     finalMatrix = sampledAmplitude * np.sinc(K)
@@ -142,10 +137,11 @@ def addNoise(timeReadings, amplitudeReadings, snr_db):
     power_avg_watt = np.mean(power_watt)
     power_avg_db = 10 * np.log10(power_avg_watt)
     noise_power_avg_db = power_avg_db - snr_db
+    
     # convert P(dB) => P(watt)
     noise_power_avg_watts = 10 ** (noise_power_avg_db / 10)
 
-    #     # # Generate an sample of white noise
+    # Generate an sample of white noise
     noise_mean = 0
     noise_volts = np.random.normal(
         noise_mean, np.sqrt(noise_power_avg_watts), len(power_watt))
