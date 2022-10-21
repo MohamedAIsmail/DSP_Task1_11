@@ -28,6 +28,7 @@ options = st.sidebar.radio(
 
 if options == 'Signal Reconstructing':
     uploaded_Signal = st.file_uploader('Upload your Signal here!')
+
     if uploaded_Signal:
         samplingRate = st.slider('Choose desired Sampling frequency',
                                  min_value=1, max_value=100, step=1, key='samplingFrequency')
@@ -35,7 +36,7 @@ if options == 'Signal Reconstructing':
         fn.SignalPlotting(SignalFile.iloc[:, 0].to_numpy(
         ), SignalFile.iloc[:, 1].to_numpy(), samplingRate)
 
-        SNR = st.slider('SNR (dBw)', 0.01, 100.0, 20.0)
+        SNR = st.slider('SNR (dBw)', 0.01, 100.0, 20.0, key='SNRValue')
         fn.addNoise(SignalFile.iloc[:, 0].to_numpy(
         ), SignalFile.iloc[:, 1].to_numpy(), SNR)
 

@@ -21,7 +21,6 @@ def GetMaximumFrequencyComponent(timeReadings, amplitudeReadings):
     for index, frequency in enumerate(frequencies):
         if magnitudes[index] >= 0.05:
             maximumFrequency = frequency
-    st.write(maximumFrequency)
     return round(maximumFrequency)
 
 
@@ -46,9 +45,10 @@ def signalReconstructing(time_Points, sampledTime, sampledAmplitude):
 
     TimeMatrix = np.resize(time_Points, (len(sampledTime), len(time_Points))) # Matrix containing all Timepoints
 
-    # The following equations is according to White- Shannon interpoltion formula ((t- nT)/T)
+    # The following equations is according to White- Shannon interpoltion formula ((t - nT)/T)
     K = (TimeMatrix.T - sampledTime) / (sampledTime[1] - sampledTime[0]) # Transpose for TimeMatrix is a must for proper calculations (broadcasting)
-    
+
+
     # Reconstructed Amplitude = x[n] sinc(v) -- Whitetaker Shannon
     finalMatrix = sampledAmplitude * np.sinc(K)
 
@@ -87,10 +87,11 @@ def SignalPlotting(timeReadings, amplitudeReadings, samplingRate):
     timeRange_max = max(timeReadings)
     timeRange_min = min(timeReadings)
     timeRange = timeRange_max - timeRange_min
-
     
     sampledAmplitude, sampledTime = signalSampling(
         amplitudeReadings, timeReadings, samplingRate, timeRange)
+
+    st.write(GetMaximumFrequencyComponent(timeReadings, amplitudeReadings))
 
     left_column, right_column = st.columns(2)
 
@@ -120,12 +121,21 @@ def SignalPlotting(timeReadings, amplitudeReadings, samplingRate):
             st.plotly_chart(fig2, use_container_width=True)
 
 
-# ----------------------- Function of reading data from file ------------------------------
+# ----------------------- Function of reading data from file and plotting ------------------------------
 
 def read_file(file):
     df = pd.read_csv(file)
     return df
 
+
+def Plotting():
+    fig, ax = plt.subplots()
+    ax.plot(x_axis, y_axis)
+    ax.set_xlabel(f'{x_axis_label}')
+    ax.set_ylabel(f'{y_axis_label}')
+    st.plotly_chart(fig, use_container_width=True)
+
+# ----------------------- Function of adding noise ------------------------------
 
 def addNoise(timeReadings, amplitudeReadings, snr_db):
     power_watt = amplitudeReadings**2
@@ -134,10 +144,12 @@ def addNoise(timeReadings, amplitudeReadings, snr_db):
     noise_power_avg_db = power_avg_db - snr_db
     # convert P(dB) => P(watt)
     noise_power_avg_watts = 10 ** (noise_power_avg_db / 10)
+
     #     # # Generate an sample of white noise
     noise_mean = 0
     noise_volts = np.random.normal(
         noise_mean, np.sqrt(noise_power_avg_watts), len(power_watt))
+        
     signal_with_noise = amplitudeReadings + noise_volts
 
     noiseFig = go.Figure()
@@ -147,3 +159,22 @@ def addNoise(timeReadings, amplitudeReadings, snr_db):
     noiseFig.update_yaxes(title_text="Amplitude (mV)")
     st.plotly_chart(noiseFig, use_container_width=True)
     
+
+
+# ----------------------- Function of converting any signal to CSV FILE ------------------------------
+
+def convert_to_dataframe(timeReading, ampltiudeReading, par1_name, par2_name):
+    signal = []
+    for i in range(len(time)):
+        signal.append([timeReading[i], ampltiudeReading[i]])
+    return pd.DataFrame(signal, columns=[f'{par1_name}', f'{par2_name}'])
+
+
+def download_csv_file(timeReading, ampltiudeReading, file_name, x_axis_label, y_axis_label):
+    signal_analysis_table = convert_to_dataframe(
+        timeReading, ampltiudeReading, x_axis_label, y_axis_label)
+    signal_csv = signal_analysis_table.to_csv()
+    st.download_button('Download CSV file', signal_csv,
+                       f'signal_{file_name}.csv')
+
+
