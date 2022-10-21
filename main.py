@@ -35,6 +35,10 @@ if options == 'Signal Reconstructing':
         fn.SignalPlotting(SignalFile.iloc[:, 0].to_numpy(
         ), SignalFile.iloc[:, 1].to_numpy(), samplingRate)
 
+        SNR = st.slider('SNR (dBw)', 0.01, 100.0, 20.0)
+        fn.addNoise(SignalFile.iloc[:, 0].to_numpy(
+        ), SignalFile.iloc[:, 1].to_numpy(), SNR)
+
 
 if options == 'Signal Composer':
 

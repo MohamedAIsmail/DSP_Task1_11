@@ -125,3 +125,25 @@ def SignalPlotting(timeReadings, amplitudeReadings, samplingRate):
 def read_file(file):
     df = pd.read_csv(file)
     return df
+
+
+def addNoise(timeReadings, amplitudeReadings, snr_db):
+    power_watt = amplitudeReadings**2
+    power_avg_watt = np.mean(power_watt)
+    power_avg_db = 10 * np.log10(power_avg_watt)
+    noise_power_avg_db = power_avg_db - snr_db
+    # convert P(dB) => P(watt)
+    noise_power_avg_watts = 10 ** (noise_power_avg_db / 10)
+    #     # # Generate an sample of white noise
+    noise_mean = 0
+    noise_volts = np.random.normal(
+        noise_mean, np.sqrt(noise_power_avg_watts), len(power_watt))
+    signal_with_noise = amplitudeReadings + noise_volts
+
+    noiseFig = go.Figure()
+    noiseFig.add_trace(go.Scatter(
+        x=timeReadings, y=signal_with_noise, mode='lines', line=dict(color='firebrick')))
+    noiseFig.update_xaxes(title_text="Time (s)")
+    noiseFig.update_yaxes(title_text="Amplitude (mV)")
+    st.plotly_chart(noiseFig, use_container_width=True)
+    
