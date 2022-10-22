@@ -16,10 +16,11 @@ with open('style.css') as f:
 
 # ---------------------- view selected signal-------------------------------------------
 
+
 def view_selected_signal():
     if signalselect != None:
         sigpar = fn.findsig(signalselect)
-        sig = sigpar[0] * np.sin(2 * np.pi * sigpar[1] * t )
+        sig = sigpar[0] * np.sin(2 * np.pi * sigpar[1] * t)
         return sig
 
 
@@ -28,22 +29,25 @@ st.image("sampling_studio.png")
 
 signals = []
 
+uploaded_Signal = st.sidebar.file_uploader('Upload your Signal here!')
 
 options = st.sidebar.radio(
     'Pages', options=['Signal Reconstructing', 'Signal Composer'])
+
+left_column, right_column = st.columns(2)
 
 
 # Navigation
 # --------------------------- Signal Uploading - Plotting - Reconstructing --------------------------------
 
 if options == 'Signal Reconstructing':
-    uploaded_Signal = st.file_uploader('Upload your Signal here!')
+
     samplingRate = st.sidebar.slider('Sampling Frequency (Hz)',
                                      min_value=1, max_value=100, step=1, key='samplingFrequency')
-    SNR = st.sidebar.slider('SNR (dBw)', 0.01, 100.0, 20.0, key='SNRValue')
+    SNR = st.sidebar.slider('SNR (dBw)', 0.01, 100.0,
+                            20.0, step=0.5, key='SNRValue')
 
     if uploaded_Signal:
-
         SignalFile = fn.read_file(uploaded_Signal)
         fn.SignalPlotting(SignalFile.iloc[:, 1].to_numpy(
         ), SignalFile.iloc[:, 2].to_numpy(), samplingRate)
@@ -51,6 +55,16 @@ if options == 'Signal Reconstructing':
         fn.addNoise(SignalFile.iloc[:, 1].to_numpy(
         ), SignalFile.iloc[:, 2].to_numpy(), SNR)
 
+        NyquistRate = st.sidebar.metric(
+            "Nyquist Frequency", str(fn.GetMaximumFrequencyComponent(SignalFile.iloc[:, 1].to_numpy(
+            ), SignalFile.iloc[:, 2].to_numpy())) + ' Hz')
+    else:
+        with left_column:
+            fn.Plotting([], [], 'Signal Plot', '#0fb7bd')
+        with right_column:
+            fn.Plotting([], [], 'Reconstructed Plot', '#0fb7bd')
+
+        fn.Plotting([], [], 'Noise', '#0fb7bd')
 
 if options == 'Signal Composer':
 
@@ -67,15 +81,14 @@ if options == 'Signal Composer':
     freq = st.sidebar.number_input(
         'Frequency', min_value=0.0, max_value=60.0, step=1.0)
     amp = st.sidebar.number_input('Amplitude', step=1.0)
-    
     sig = amp * np.sin(2 * np.pi * freq * t)
 
     viewText = 'Signal Viewer'
+    addText = 'Added Signals'
+    selectedSignalText = 'Signal Selected'
 
     addsig = st.sidebar.button('Add Signal')
-    addText = 'Added Signals'
-
-    selectedSignalText = 'Signal Selected'
+    
 
     if addsig:
         st.session_state.a_count += 1

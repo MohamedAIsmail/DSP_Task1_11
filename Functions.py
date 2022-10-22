@@ -71,7 +71,7 @@ def signalcomposer(sig, t):
 def summedsignal(sig, t):
     ysum = 0
     for i in range(len(sig)):
-        ysum += sig[i][0] * np.sin(2 * np.pi * sig[i][1] * t )
+        ysum += sig[i][0] * np.sin(2 * np.pi * sig[i][1] * t)
     fig2 = go.Figure()
     fig2.add_trace(go.Scatter(x=t, y=ysum,
                               mode='lines'))
@@ -81,7 +81,7 @@ def summedsignal(sig, t):
 # ----------------------- Function of plotting data and its reconstruction from file ------------------------------
 
 def SignalPlotting(timeReadings, amplitudeReadings, samplingRate):
-
+    
     timeRange_max = max(timeReadings)
     timeRange_min = min(timeReadings)
     timeRange = timeRange_max - timeRange_min
@@ -94,7 +94,7 @@ def SignalPlotting(timeReadings, amplitudeReadings, samplingRate):
     with left_column:
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=timeReadings, y=amplitudeReadings,
-                                 mode='lines', name='Signal Plot'))
+                                 mode='lines', name='Signal Plot', marker_color='#0fb7bd'))
 
         maxF = GetMaximumFrequencyComponent(timeReadings, amplitudeReadings)
 
@@ -200,7 +200,8 @@ def summedsignal(t):
         return st.session_state.sigparameters
     else:
         for i in range(len(st.session_state.sigparameters)):
-            ysum += st.session_state.sigparameters[i][0] * np.sin(2 * np.pi * st.session_state.sigparameters[i][1] * t )
+            ysum += st.session_state.sigparameters[i][0] * np.sin(
+                2 * np.pi * st.session_state.sigparameters[i][1] * t)
         return ysum
 
 
