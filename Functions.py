@@ -126,7 +126,6 @@ def Plotting(time, Signal, plotHeader):
     Fig = go.Figure()
     Fig.add_trace(go.Scatter(
         x=time, y=Signal, mode='lines'))
-        
     st.plotly_chart(Fig, use_container_width=True)
 
 # ----------------------- Function of adding noise ------------------------------

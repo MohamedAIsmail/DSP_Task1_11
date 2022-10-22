@@ -69,21 +69,22 @@ if options == 'Signal Composer':
             view = st.form_submit_button('view')
             addsig = st.form_submit_button('add')
 
+    if view:
+        viewText = 'View Signal'
+        sig = amp * np.sin(2 * np.pi * freq * t + phi)
+
+    if addsig:
+        addText = 'Add Signal'
+        st.session_state.a_count += 1
+        name = 'signal ' + str(st.session_state.a_count)
+        signal = [amp, freq, phi, name]
+        st.session_state.sigparameters.append(signal)
+        
     with col1:
-        if view:
-            text = 'View Signal'
-            sig = amp * np.sin(2 * np.pi * freq * t + phi)
-            fn.Plotting(t, sig, text)
+        fn.Plotting(t, sig, viewText)
 
     with col2:
-        if addsig:
-            text = 'Add Signal'
-            st.session_state.a_count += 1
-            name = 'signal ' + str(st.session_state.a_count)
-            signal = [amp, freq, phi, name]
-            st.session_state.sigparameters.append(signal)
-            
-            fn.Plotting(t, fn.summedsignal(t), text)
+        fn.Plotting(t, fn.summedsignal(t), viewText)
 
 
 
