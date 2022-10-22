@@ -8,14 +8,17 @@ text-align: center;
 text-align: left;
 }
 
-.stSlider{
-width: 600px !important ;    
-margin-left: 31%;
-margin-bottom: -1%;
-
-}
-
 .css-1a32fsj{
-
 z-index: -1;
 }
+
+.css-e370rw{
+    visibility: hidden;
+    display: none;
+}
+
+.css-1v0mbdj {
+    margin-left: auto;
+    margin-right: auto;
+}
+
