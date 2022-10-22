@@ -59,49 +59,48 @@ if options == 'Signal Composer':
     if 'a_count' not in st.session_state:
         st.session_state['a_count'] = 0
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     t = []
     sig = []
 
-    with col3:
-        t = np.linspace(-2, 2, 1000)
-        freq = st.sidebar.number_input(
-            'frequency', min_value=0.0, max_value=60.0, step=1.0)
-        amp = st.sidebar.number_input('amplitude', step=1.0)
-        phi = st.sidebar.number_input(
-            'phase', min_value=-2 * np.pi, max_value=2 * np.pi, step=np.pi, value=0.0)
-        sig = amp * np.sin(2 * np.pi * freq * t + phi)
+    t = np.linspace(-2, 2, 1000)
+    freq = st.sidebar.number_input(
+        'Frequency', min_value=0.0, max_value=60.0, step=1.0)
+    amp = st.sidebar.number_input('Amplitude', step=1.0)
+    phi = st.sidebar.number_input(
+        'Phase', min_value=-2 * np.pi, max_value=2 * np.pi, step=np.pi, value=0.0)
+    sig = amp * np.sin(2 * np.pi * freq * t + phi)
 
-        viewText = 'Signal Viewer'
+    viewText = 'Signal Viewer'
 
-        addsig = st.sidebar.button('Add Signal')
-        addText = 'Added Signals'
+    addsig = st.sidebar.button('Add Signal')
+    addText = 'Added Signals'
 
-        selectedSignalText = 'Signal Selected'
+    selectedSignalText = 'Signal Selected'
 
-        if addsig:
-            st.session_state.a_count += 1
-            name = 'signal ' + str(st.session_state.a_count)
-            signal = [amp, freq, phi, name]
-            st.session_state.sigparameters.append(signal)
+    if addsig:
+        st.session_state.a_count += 1
+        name = 'Signal ' + str(st.session_state.a_count)
+        signal = [amp, freq, phi, name]
+        st.session_state.sigparameters.append(signal)
 
-        slct = []
-        for i in range(len(st.session_state.sigparameters)):
-            slct.append(st.session_state.sigparameters[i][3])
+    slct = []
+    for i in range(len(st.session_state.sigparameters)):
+        slct.append(st.session_state.sigparameters[i][3])
 
-        signalselect = st.sidebar.selectbox(
-            'select a signal', slct, on_change=view_selected_signal)
-        viewSelectedSignalText = 'Selected Signal'
+    signalselect = st.sidebar.selectbox(
+        'Select a signal', slct, on_change=view_selected_signal)
+    viewSelectedSignalText = 'Selected Signal'
 
-        if (signalselect != None):
-            signal_csv = fn.download_csv_file(t, fn.summedsignal(
-                t), 'Time (s)', 'Voltage (V)')
-            st.sidebar.download_button('Download Composed Signal File', signal_csv,
-                                       'Composed Signal.csv')
-
+    if (signalselect != None):
+        signal_csv = fn.download_csv_file(t, fn.summedsignal(
+            t), 'Time (s)', 'Voltage (V)')
+        st.sidebar.download_button('Download Composed Signal File', signal_csv,
+                                   'Composed Signal.csv')
         deletesig = st.sidebar.button(
             'Delete', on_click=fn.handle_click, args=(signalselect,))
-        fn.Plotting(t, fn.summedsignal(t), addText, '#0fb7bd')
+
+    fn.Plotting(t, fn.summedsignal(t), addText, '#0fb7bd')
 
     with col1:
         fn.Plotting(t, sig, viewText, '#0fb7bd')

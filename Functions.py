@@ -96,8 +96,9 @@ def SignalPlotting(timeReadings, amplitudeReadings, samplingRate):
         fig.add_trace(go.Scatter(x=timeReadings, y=amplitudeReadings,
                                  mode='lines', name='Signal Plot'))
 
-        # Sampling points on signal
         maxF = GetMaximumFrequencyComponent(timeReadings, amplitudeReadings)
+
+    # Sampling points on signal
         fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
                                  mode='markers', name='Sampling'))
         fig.update_xaxes(title_text="Time (s)")
@@ -118,22 +119,8 @@ def SignalPlotting(timeReadings, amplitudeReadings, samplingRate):
         with right_column:
             reconstructedAmp = signalReconstructing(
                 timeReadings, sampledTime, sampledAmplitude)
-            fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(
-                x=timeReadings, y=reconstructedAmp, mode='lines', line=dict(color='firebrick')))
-            fig2.update_xaxes(title_text="Time (s)")
-            fig2.update_yaxes(title_text="Amplitude (mV)")
-            fig2.update_layout(title={
-                'text': "Reconstructed Plot",
-                'y': 0.9,
-                'x': 0.5,
-                'xanchor': 'center',
-                'yanchor': 'top'},
-                title_font=dict(
-                family="Arial",
-                size=20,
-            ))
-            st.plotly_chart(fig2, use_container_width=True)
+            Plotting(timeReadings, reconstructedAmp,
+                     "Reconstructed Plot", '#61c6bd')
 
 
 # ----------------------- Function of reading data from file and plotting ------------------------------
@@ -147,6 +134,8 @@ def Plotting(time, Signal, plotHeader, colorGiv):
     Fig = go.Figure()
     Fig.add_trace(go.Scatter(
         x=time, y=Signal, mode='lines', marker_color=colorGiv))
+    Fig.update_xaxes(title_text="Time (s)")
+    Fig.update_yaxes(title_text="Amplitude (mV)")
     Fig.update_layout(title={
         'text': plotHeader,
         'y': 0.9,

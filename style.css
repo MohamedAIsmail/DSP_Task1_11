@@ -12,7 +12,7 @@ text-align: left;
 z-index: -1;
 }
 
-.css-e370rw{
+.css-1ok255g{
     visibility: hidden;
     display: none;
 }
@@ -22,3 +22,18 @@ z-index: -1;
     margin-right: auto;
 }
 
+.css-s658vx{
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    background-color: black;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.css-16huue1{
+    font-family: Arial, Helvetica, sans-serif;
+}
+.stSlider{
+    margin-top: 10%;
+}
