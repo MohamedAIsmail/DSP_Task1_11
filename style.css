@@ -43,5 +43,10 @@ z-index: -1;
     font-family: Arial, Helvetica, sans-serif;
 }
 .stSlider{
-    margin-top: 10%;
+    margin-top: 5%;
+}
+
+.stCheckbox{
+    margin-left: auto;
+    margin-right: auto;
 }

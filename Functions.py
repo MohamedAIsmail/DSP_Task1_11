@@ -35,6 +35,27 @@ def signalSampling(Amplitude, Time, sampleFreq, timeRange):
 
     return sampledAmplitude, sampledTime
 
+# ----------------------- Function of adding noise ------------------------------
+
+
+def addNoise(amplitudeReadings, snr_db):
+    power_watt = amplitudeReadings**2
+    power_avg_watt = np.mean(power_watt)
+    power_avg_db = 10 * np.log10(power_avg_watt)
+    noise_power_avg_db = power_avg_db - snr_db
+
+    # convert P(dB) => P(watt)
+    noise_power_avg_watts = 10 ** (noise_power_avg_db / 10)
+
+    # Generate an sample of white noise
+    noise_mean = 0
+
+    noise_volts = np.random.normal(
+        noise_mean, np.sqrt(noise_power_avg_watts), len(power_watt))
+
+    signal_with_noise = amplitudeReadings + noise_volts
+
+    return signal_with_noise
 
 # ----------------------- Function of Reconstructing the Signal ------------------------------
 
@@ -56,73 +77,50 @@ def signalReconstructing(time_Points, sampledTime, sampledAmplitude):
     return ReconstructedSignal
 
 
-# ----------------------- Function of plotting the composed signal ------------------------------
+# ----------------------- Function of plotting data with Noise ------------------------------
 
-def signalcomposer(sig, t):
-    # plotanysig(t,sig,'the composed signal')
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=t, y=sig,
-                             mode='lines'))
-    st.plotly_chart(fig)
+def SignalPlotting(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckBox, snr_db):
 
-
-# ----------------------- Function of plotting the summed signal ------------------------------
-
-def summedsignal(sig, t):
-    ysum = 0
-    for i in range(len(sig)):
-        ysum += sig[i][0] * np.sin(2 * np.pi * sig[i][1] * t)
-    fig2 = go.Figure()
-    fig2.add_trace(go.Scatter(x=t, y=ysum,
-                              mode='lines'))
-    st.plotly_chart(fig2)
-
-
-# ----------------------- Function of plotting data and its reconstruction from file ------------------------------
-
-def SignalPlotting(timeReadings, amplitudeReadings, samplingRate):
-    
     timeRange_max = max(timeReadings)
     timeRange_min = min(timeReadings)
     timeRange = timeRange_max - timeRange_min
 
-    sampledAmplitude, sampledTime = signalSampling(
-        amplitudeReadings, timeReadings, samplingRate, timeRange)
-
-    left_column, right_column = st.columns(2)
-
-    with left_column:
+    if(AddNoiseCheckBox):
+        signal_with_Noise = addNoise(amplitudeReadings, snr_db)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=timeReadings, y=signal_with_Noise,
+                                 mode='lines', name='Signal Plot', marker_color='#0fb7bd'))
+        sampledAmplitude, sampledTime = signalSampling(
+            signal_with_Noise, timeReadings, samplingRate, timeRange)
+    else:
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=timeReadings, y=amplitudeReadings,
-                                 mode='lines', name='Signal Plot', marker_color='#0fb7bd'))
+                                mode='lines', name='Signal Plot', marker_color='#0fb7bd'))
+        sampledAmplitude, sampledTime = signalSampling(
+            amplitudeReadings, timeReadings, samplingRate, timeRange)
 
-        maxF = GetMaximumFrequencyComponent(timeReadings, amplitudeReadings)
+# Sampling points on signal
+    fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
+                            mode='markers', name='Sampling'))
+    fig.update_xaxes(title_text="Time (s)")
+    fig.update_yaxes(title_text="Amplitude (mV)")
+    fig.update_layout(title={
+        'text': "Signal Plot",
+        'y': 0.9,
+        'x': 0.49,
+        'xanchor': 'center',
+        'yanchor': 'top'},
+        title_font=dict(
+            family="Arial",
+            size=20,
+    ))
+    st.plotly_chart(fig, use_container_width=True)
 
-    # Sampling points on signal
-        fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
-                                 mode='markers', name='Sampling'))
-        fig.update_xaxes(title_text="Time (s)")
-        fig.update_yaxes(title_text="Amplitude (mV)")
-        fig.update_layout(title={
-            'text': "Signal Plot",
-            'y': 0.9,
-            'x': 0.49,
-            'xanchor': 'center',
-            'yanchor': 'top'},
-            title_font=dict(
-                family="Arial",
-                size=20,
-        ))
-        st.plotly_chart(fig, use_container_width=True)
-
-    if samplingRate > 0:
-        with right_column:
-            reconstructedAmp = signalReconstructing(
-                timeReadings, sampledTime, sampledAmplitude)
-            Plotting(timeReadings, reconstructedAmp,
-                     "Reconstructed Plot", '#61c6bd')
-
-
+    reconstructedAmp = signalReconstructing(
+        timeReadings, sampledTime, sampledAmplitude)
+    Plotting(timeReadings, reconstructedAmp,
+            "Reconstructed Plot", '#61c6bd')
+            
 # ----------------------- Function of reading data from file and plotting ------------------------------
 
 def read_file(file):
@@ -149,27 +147,7 @@ def Plotting(time, Signal, plotHeader, colorGiv):
     st.plotly_chart(Fig, use_container_width=True)
 
 
-# ----------------------- Function of adding noise ------------------------------
 
-
-def addNoise(timeReadings, amplitudeReadings, snr_db):
-    power_watt = amplitudeReadings**2
-    power_avg_watt = np.mean(power_watt)
-    power_avg_db = 10 * np.log10(power_avg_watt)
-    noise_power_avg_db = power_avg_db - snr_db
-
-    # convert P(dB) => P(watt)
-    noise_power_avg_watts = 10 ** (noise_power_avg_db / 10)
-
-    # Generate an sample of white noise
-    noise_mean = 0
-
-    noise_volts = np.random.normal(
-        noise_mean, np.sqrt(noise_power_avg_watts), len(power_watt))
-
-    signal_with_noise = amplitudeReadings + noise_volts
-
-    Plotting(timeReadings, signal_with_noise, 'Noise', '#0fb7bd')
 
 
 # ----------------------- Function of converting any signal to CSV FILE ------------------------------
@@ -192,7 +170,7 @@ def download_csv_file(timeReading, ampltiudeReading, x_axis_label, y_axis_label)
         return signal_csv
 
 
-# ----------------------- Function of plotting the summed signal ------------------------------
+# ----------------------- Function of signal summation ------------------------------
 
 def summedsignal(t):
     ysum = 0
@@ -205,14 +183,15 @@ def summedsignal(t):
         return ysum
 
 
-# ----------------------- find selected signal----------------------------------
+# ----------------------- Find selected signal function ----------------------------------
+
 def findsig(name):
     for i in range(len(st.session_state.sigparameters)):
         if name == st.session_state.sigparameters[i][2]:
             return st.session_state.sigparameters[i]
 
 
-# ----------------------- delete selected signal----------------------------------
+# ----------------------- Delete selected signal function ----------------------------------
 
 def delsig(name):
     for i in range(len(st.session_state.sigparameters)):
@@ -220,7 +199,7 @@ def delsig(name):
             return i
 
 
-# ---------------------- handle click -------------------------------------------
+# ---------------------- Handle click event -------------------------------------------
 
 def handle_click(name):
     if name != None:
