@@ -60,21 +60,23 @@ if options == 'Signal Composer':
 
     with col3:
         with st.form('Signal Generator'):
+
             t = np.linspace(-2, 2, 10000)
             freq = st.number_input(
                 'frequency', min_value=0.0, max_value=60.0, step=1.0)
             amp = st.number_input('amplitude', step=1.0)
             phi = st.number_input(
                 'phase', min_value=-2 * np.pi, max_value=2 * np.pi, step=np.pi, value=0.0)
+                
+            sig = amp * np.sin(2 * np.pi * freq * t + phi)
+
             view = st.form_submit_button('view')
+            viewText = 'View Signal'
+
             addsig = st.form_submit_button('add')
-
-    if view:
-        viewText = 'View Signal'
-        sig = amp * np.sin(2 * np.pi * freq * t + phi)
-
+            addText = 'Add Signal'
+        
     if addsig:
-        addText = 'Add Signal'
         st.session_state.a_count += 1
         name = 'signal ' + str(st.session_state.a_count)
         signal = [amp, freq, phi, name]
@@ -84,8 +86,7 @@ if options == 'Signal Composer':
         fn.Plotting(t, sig, viewText)
 
     with col2:
-        fn.Plotting(t, fn.summedsignal(t), viewText)
-
+        fn.Plotting(t, fn.summedsignal(t), addText)
 
 
     with col3:

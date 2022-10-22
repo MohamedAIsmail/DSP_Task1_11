@@ -176,10 +176,13 @@ def download_csv_file(timeReading, ampltiudeReading, file_name, x_axis_label, y_
 
 def summedsignal(t):
     ysum = 0
-    for i in range(len(st.session_state.sigparameters)):
-        ysum += st.session_state.sigparameters[i][0] * np.sin(
-            2 * np.pi * st.session_state.sigparameters[i][1] * t + st.session_state.sigparameters[i][2])
-    return ysum
+    if st.session_state.sigparameters == []:
+        return st.session_state.sigparameters
+    else:
+        for i in range(len(st.session_state.sigparameters)):
+            ysum += st.session_state.sigparameters[i][0] * np.sin(
+                2 * np.pi * st.session_state.sigparameters[i][1] * t + st.session_state.sigparameters[i][2])
+        return ysum
 
 
 #----------------------- find selected signal----------------------------------
