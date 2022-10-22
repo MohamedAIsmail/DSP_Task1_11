@@ -71,7 +71,7 @@ def summedsignal(sig, t):
         ysum += sig[i][0] * np.sin(2 * np.pi * sig[i][1] * t + sig[i][2])
     fig2 = go.Figure()
     fig2.add_trace(go.Scatter(x=t, y=ysum,
-                              mode='lines'))
+                            mode='lines'))
     st.plotly_chart(fig2)
 
 
@@ -121,12 +121,13 @@ def read_file(file):
     return df
 
 
-def Plotting():
-    fig, ax = plt.subplots()
-    ax.plot(x_axis, y_axis)
-    ax.set_xlabel(f'{x_axis_label}')
-    ax.set_ylabel(f'{y_axis_label}')
-    st.plotly_chart(fig, use_container_width=True)
+def Plotting(time, Signal, plotHeader):
+    st.header(plotHeader)
+    Fig = go.Figure()
+    Fig.add_trace(go.Scatter(
+        x=time, y=Signal, mode='lines'))
+        
+    st.plotly_chart(Fig, use_container_width=True)
 
 # ----------------------- Function of adding noise ------------------------------
 
@@ -171,4 +172,37 @@ def download_csv_file(timeReading, ampltiudeReading, file_name, x_axis_label, y_
     st.download_button('Download CSV file', signal_csv,
                        f'signal_{file_name}.csv')
 
+
+# ----------------------- Function of plotting the summed signal ------------------------------
+
+def summedsignal(t):
+    ysum = 0
+    for i in range(len(st.session_state.sigparameters)):
+        ysum += st.session_state.sigparameters[i][0] * np.sin(
+            2 * np.pi * st.session_state.sigparameters[i][1] * t + st.session_state.sigparameters[i][2])
+    return ysum
+
+
+#----------------------- find selected signal----------------------------------
+def findsig(name):
+    for i in range(len(st.session_state.sigparameters)):
+        if name == st.session_state.sigparameters[i][3]:
+            return st.session_state.sigparameters[i]
+
+
+#----------------------- delete selected signal----------------------------------
+
+def delsig(name):
+    for i in range(len(st.session_state.sigparameters)):
+        if name == st.session_state.sigparameters[i][3]:
+            return i
+
+
+#---------------------- handle click -------------------------------------------
+
+def handle_click(name):
+    if name != None:
+        indx = delsig(name)
+        st.session_state.sigparameters.remove(
+            st.session_state.sigparameters[indx])
 
