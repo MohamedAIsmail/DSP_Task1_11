@@ -59,6 +59,7 @@ def addNoise(amplitudeReadings, snr_db):
 
 # ----------------------- Function of Reconstructing the Signal ------------------------------
 
+
 def signalReconstructing(time_Points, sampledTime, sampledAmplitude):
 
     # Matrix containing all Timepoints
@@ -85,23 +86,23 @@ def SignalPlotting(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
     timeRange_min = min(timeReadings)
     timeRange = timeRange_max - timeRange_min
 
-    if(AddNoiseCheckBox):
+    if (AddNoiseCheckBox):  # if this is True, Noise will be added on the real signal and then sampled according to the final plot
         signal_with_Noise = addNoise(amplitudeReadings, snr_db)
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=timeReadings, y=signal_with_Noise,
                                  mode='lines', name='Signal Plot', marker_color='#0fb7bd'))
         sampledAmplitude, sampledTime = signalSampling(
             signal_with_Noise, timeReadings, samplingRate, timeRange)
-    else:
+    else:                 # if false, Signal will be plotted and reconstrcuted without any noise
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=timeReadings, y=amplitudeReadings,
-                                mode='lines', name='Signal Plot', marker_color='#0fb7bd'))
+                                 mode='lines', name='Signal Plot', marker_color='#0fb7bd'))
         sampledAmplitude, sampledTime = signalSampling(
             amplitudeReadings, timeReadings, samplingRate, timeRange)
 
 # Sampling points on signal
     fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
-                            mode='markers', name='Sampling'))
+                             mode='markers', name='Sampling'))
     fig.update_xaxes(title_text="Time (s)")
     fig.update_yaxes(title_text="Amplitude (mV)")
     fig.update_layout(title={
@@ -116,17 +117,14 @@ def SignalPlotting(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
     ))
     st.plotly_chart(fig, use_container_width=True)
 
+# Reconstructing the signal then plotting it
     reconstructedAmp = signalReconstructing(
         timeReadings, sampledTime, sampledAmplitude)
     Plotting(timeReadings, reconstructedAmp,
-            "Reconstructed Plot", '#61c6bd')
-            
+             "Reconstructed Plot", '#61c6bd')
+
+
 # ----------------------- Function of reading data from file and plotting ------------------------------
-
-def read_file(file):
-    df = pd.read_csv(file)
-    return df
-
 
 def Plotting(time, Signal, plotHeader, colorGiv):
     Fig = go.Figure()
@@ -147,10 +145,7 @@ def Plotting(time, Signal, plotHeader, colorGiv):
     st.plotly_chart(Fig, use_container_width=True)
 
 
-
-
-
-# ----------------------- Function of converting any signal to CSV FILE ------------------------------
+# ----------------------- Function of converting any signal to CSV File ------------------------------
 
 def convert_to_dataframe(timeReading, ampltiudeReading, par1_name, par2_name):
     signal = []
@@ -174,7 +169,7 @@ def download_csv_file(timeReading, ampltiudeReading, x_axis_label, y_axis_label)
 
 def summedsignal(t):
     ysum = 0
-    if (st.session_state.sigparameters == []):
+    if (st.session_state.sigparameters == []):  # Exception Handling
         return st.session_state.sigparameters
     else:
         for i in range(len(st.session_state.sigparameters)):
@@ -191,7 +186,7 @@ def findsig(name):
             return st.session_state.sigparameters[i]
 
 
-# ----------------------- Delete selected signal function ----------------------------------
+# ----------------------- Delete selected signal function based on selection ----------------------------------
 
 def delsig(name):
     for i in range(len(st.session_state.sigparameters)):
@@ -206,3 +201,10 @@ def handle_click(name):
         indx = delsig(name)
         st.session_state.sigparameters.remove(
             st.session_state.sigparameters[indx])
+
+# ---------------------- Read the CSV file -------------------------------------------
+
+
+def read_file(file):
+    df = pd.read_csv(file)
+    return df
