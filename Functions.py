@@ -146,7 +146,7 @@ def read_file(file):
 def Plotting(time, Signal, plotHeader, colorGiv):
     Fig = go.Figure()
     Fig.add_trace(go.Scatter(
-        x=time, y=Signal, mode='lines'))
+        x=time, y=Signal, mode='lines', marker_color=colorGiv))
     Fig.update_layout(title={
         'text': plotHeader,
         'y': 0.9,
@@ -174,7 +174,7 @@ def addNoise(timeReadings, amplitudeReadings, snr_db):
 
     # Generate an sample of white noise
     noise_mean = 0
-    
+
     noise_volts = np.random.normal(
         noise_mean, np.sqrt(noise_power_avg_watts), len(power_watt))
 
