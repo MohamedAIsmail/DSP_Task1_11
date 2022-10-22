@@ -71,7 +71,7 @@ def signalcomposer(sig, t):
 def summedsignal(sig, t):
     ysum = 0
     for i in range(len(sig)):
-        ysum += sig[i][0] * np.sin(2 * np.pi * sig[i][1] * t + sig[i][2])
+        ysum += sig[i][0] * np.sin(2 * np.pi * sig[i][1] * t )
     fig2 = go.Figure()
     fig2.add_trace(go.Scatter(x=t, y=ysum,
                               mode='lines'))
@@ -200,15 +200,14 @@ def summedsignal(t):
         return st.session_state.sigparameters
     else:
         for i in range(len(st.session_state.sigparameters)):
-            ysum += st.session_state.sigparameters[i][0] * np.sin(
-                2 * np.pi * st.session_state.sigparameters[i][1] * t + st.session_state.sigparameters[i][2])
+            ysum += st.session_state.sigparameters[i][0] * np.sin(2 * np.pi * st.session_state.sigparameters[i][1] * t )
         return ysum
 
 
 # ----------------------- find selected signal----------------------------------
 def findsig(name):
     for i in range(len(st.session_state.sigparameters)):
-        if name == st.session_state.sigparameters[i][3]:
+        if name == st.session_state.sigparameters[i][2]:
             return st.session_state.sigparameters[i]
 
 
@@ -216,7 +215,7 @@ def findsig(name):
 
 def delsig(name):
     for i in range(len(st.session_state.sigparameters)):
-        if name == st.session_state.sigparameters[i][3]:
+        if name == st.session_state.sigparameters[i][2]:
             return i
 
 

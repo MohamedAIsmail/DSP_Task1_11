@@ -19,7 +19,7 @@ with open('style.css') as f:
 def view_selected_signal():
     if signalselect != None:
         sigpar = fn.findsig(signalselect)
-        sig = sigpar[0] * np.sin(2 * np.pi * sigpar[1] * t + sigpar[2])
+        sig = sigpar[0] * np.sin(2 * np.pi * sigpar[1] * t )
         return sig
 
 
@@ -67,9 +67,8 @@ if options == 'Signal Composer':
     freq = st.sidebar.number_input(
         'Frequency', min_value=0.0, max_value=60.0, step=1.0)
     amp = st.sidebar.number_input('Amplitude', step=1.0)
-    phi = st.sidebar.number_input(
-        'Phase', min_value=-2 * np.pi, max_value=2 * np.pi, step=np.pi, value=0.0)
-    sig = amp * np.sin(2 * np.pi * freq * t + phi)
+    
+    sig = amp * np.sin(2 * np.pi * freq * t)
 
     viewText = 'Signal Viewer'
 
@@ -81,12 +80,12 @@ if options == 'Signal Composer':
     if addsig:
         st.session_state.a_count += 1
         name = 'Signal ' + str(st.session_state.a_count)
-        signal = [amp, freq, phi, name]
+        signal = [amp, freq, name]
         st.session_state.sigparameters.append(signal)
 
     slct = []
     for i in range(len(st.session_state.sigparameters)):
-        slct.append(st.session_state.sigparameters[i][3])
+        slct.append(st.session_state.sigparameters[i][2])
 
     signalselect = st.sidebar.selectbox(
         'Select a signal', slct, on_change=view_selected_signal)
