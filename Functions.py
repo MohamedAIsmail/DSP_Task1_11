@@ -22,15 +22,15 @@ def GetMaximumFrequencyComponent(timeReadings, amplitudeReadings):
 
 # ----------------------- Function of plotting the Signal Resampling ------------------------------
 
-def signalSampling(Amplitude, Time, sample_freq, timeRange):
+def signalSampling(Amplitude, Time, sampleFreq, timeRange):
 
-    sampleRate = int((len(Time)/timeRange)/(sample_freq))
+    PointSteps = int((len(Time)/timeRange)/(sampleFreq))
 
-    if sampleRate == 0:
-        sampleRate = 1
+    if PointSteps == 0:
+        PointSteps = 1
 
-    sampledTime = Time[::sampleRate]
-    sampledAmplitude = Amplitude[::sampleRate]
+    sampledTime = Time[::PointSteps]
+    sampledAmplitude = Amplitude[::PointSteps]
 
     return sampledAmplitude, sampledTime
 
@@ -85,8 +85,6 @@ def SignalPlotting(timeReadings, amplitudeReadings, samplingRate):
     
     sampledAmplitude, sampledTime = signalSampling(
         amplitudeReadings, timeReadings, samplingRate, timeRange)
-
-    st.write(GetMaximumFrequencyComponent(timeReadings, amplitudeReadings))
 
     left_column, right_column = st.columns(2)
 
