@@ -6,19 +6,22 @@ import streamlit as st  # 🎈 data web app development
 import pandas as pd  # read csv, df manipulation
 import scipy.fft
 import numpy as np  # np mean, np random
-
+from scipy.signal import find_peaks
 
 # Transforming Signal to Frequency Domain to Capture Value of Maximum Frequency
 
-def GetMaximumFrequencyComponent(timeReadings, amplitudeReadings):
-    magnitudes = np.abs(scipy.fft.rfft(amplitudeReadings)) / \
-        np.max(np.abs(scipy.fft.rfft(amplitudeReadings)))
-    frequencies = scipy.fft.rfftfreq(
-        len(timeReadings), (timeReadings[1] - timeReadings[0]))
-    for index, frequency in enumerate(frequencies):
-        if magnitudes[index] >= 0.05:
-            maximumFrequency = frequency
-    return round(maximumFrequency)
+def GetMaximumFrequencyComponent(time, amplitudes):
+    
+    magnitudes = np.abs(scipy.fft.rfft(amplitudes))                    #abs(scipy.fft.rfft()) returns the magnitude of the amplitude of each frequency component in frequency domain
+
+    frequencies = scipy.fft.rfftfreq(len(time), (time[1] - time[0]))   #scipy.fft.rfftfrec( Window length, Sample spacing)  returns a list containing the signal frequency components
+
+    indices = find_peaks(magnitudes)[0]                  #the indices of the peaks magnitudes
+    maxfreq=0
+    for i in range(len(indices)):
+        if(frequencies[indices[i]]>maxfreq):
+            maxfreq = frequencies[indices[i]]
+    return round(maxfreq)
 
 
 # ----------------------- Function of plotting the Signal Resampling ------------------------------
@@ -30,15 +33,18 @@ def signalSampling(Amplitude, Time, sampleFreq, timeRange):
     if PointSteps == 0:
         PointSteps = 1
 
-    sampledTime = Time[::PointSteps]
-    sampledAmplitude = Amplitude[::PointSteps]
+    samplesTime = Time[::PointSteps]
+    samplesAmplitude = Amplitude[::PointSteps]
 
-    return sampledAmplitude, sampledTime
+    return samplesAmplitude, samplesTime
 
 # ----------------------- Function of adding noise ------------------------------
 
 
 def addNoise(amplitudeReadings, snr_db):
+
+    #SNR = signal_Pwr_db - noise_Pwr_db
+    
     power_watt = amplitudeReadings**2
     power_avg_watt = np.mean(power_watt)
     power_avg_db = 10 * np.log10(power_avg_watt)
@@ -50,10 +56,10 @@ def addNoise(amplitudeReadings, snr_db):
     # Generate an sample of white noise
     noise_mean = 0
 
-    noise_volts = np.random.normal(
-        noise_mean, np.sqrt(noise_power_avg_watts), len(power_watt))
+    noise_amplitudes = np.random.normal(
+        noise_mean, np.sqrt(noise_power_avg_watts), len(power_watt)) #random samples from a normal (Gaussian) distribution.
 
-    signal_with_noise = amplitudeReadings + noise_volts
+    signal_with_noise = amplitudeReadings + noise_amplitudes #adding noise to the original signal
 
     return signal_with_noise
 
@@ -64,11 +70,9 @@ def signalReconstructing(time_Points, sampledTime, sampledAmplitude):
 
     # Matrix containing all Timepoints
     TimeMatrix = np.resize(time_Points, (len(sampledTime), len(time_Points)))
-
-    # The following equations is according to White- Shannon interpoltion formula ((t - nT)/T)
+    # The following equations is according to White- Shannon interpoltion formula sinc((t - nT)/T) -->T is the sampling interval
     # Transpose for TimeMatrix is a must for proper calculations (broadcasting)
-    K = (TimeMatrix.T - sampledTime) / (sampledTime[1] - sampledTime[0])
-
+    K = (TimeMatrix.T - sampledTime) / (sampledTime[1] - sampledTime[0]) 
     # Reconstructed Amplitude = x[n] sinc(v) -- Whitetaker Shannon
     finalMatrix = sampledAmplitude * np.sinc(K)
 

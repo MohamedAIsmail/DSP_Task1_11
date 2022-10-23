@@ -49,7 +49,7 @@ if options == 'Signal Reconstructing':
     AddNoise = st.sidebar.checkbox('Add Noise')
 
     if uploaded_Signal:
-        # Reading Csv file into a variable called SignalFile
+        # Reading Csv file into a dataframe called SignalFile
         SignalFile = fn.read_file(uploaded_Signal)
         timeReadings = SignalFile.iloc[:, 1].to_numpy()
         ampltiudeReadings = SignalFile.iloc[:, 2].to_numpy()
@@ -57,10 +57,14 @@ if options == 'Signal Reconstructing':
         # Reading data according to the columns and plotting them, and also reconstruct according to the sampleRate
         fn.SignalPlotting(timeReadings, ampltiudeReadings,
                           samplingRate, AddNoise, SNR)
-
-        NyquistFrequency = st.sidebar.metric(
+        
+        maxFrequency = st.sidebar.metric(
             "Maximum Frequency", str(fn.GetMaximumFrequencyComponent(SignalFile.iloc[:, 1].to_numpy(
             ), SignalFile.iloc[:, 2].to_numpy())) + ' Hz')  # Viewing Fmax
+
+        Nyquistfreq = st.sidebar.metric(
+            "Nyquist Frequency","Fs ≥ " + str(2 * fn.GetMaximumFrequencyComponent(SignalFile.iloc[:, 1].to_numpy(
+            ), SignalFile.iloc[:, 2].to_numpy())) + ' Hz')  # Viewing Fs
     else:
         # Plotting empty plots for GUI incase there is no input
         fn.Plotting([], [], 'Signal Plot', '#0fb7bd')
@@ -89,7 +93,7 @@ if options == 'Signal Composer':
 
     viewText = 'Signal Viewer'  # GUI
     addText = 'Added Signals'
-    selectedSignalText = 'Signal Selected'
+    selectedSignalText = 'Selected Signal'
 
 # Button for adding signal to the session state
     addsig = st.sidebar.button('Add Signal')
