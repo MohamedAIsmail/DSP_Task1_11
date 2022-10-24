@@ -4,6 +4,10 @@ text-align: center;
 
 }
 
+.css-10trblm{
+    font-size: 30px;
+}
+
 .css-5gns2o{
 text-align: left;
 }
@@ -63,4 +67,26 @@ z-index: -1;
 .css-183lzff{
     font-family: Arial, Helvetica, sans-serif;
     font-size: 25px;
+}
+
+.stCheckbox{
+    margin-top: 10%;
+}
+
+.css-otobgn.edgvbvh9{
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.css-1dyp0p2{
+    display: flex;
+}
+
+.css-8u98yl .css-otobgn.edgvbvh9{
+    display: none;
+}
+.css-8u98yl{
+    cursor: pointer;
+    
 }
