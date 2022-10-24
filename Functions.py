@@ -10,15 +10,21 @@ import numpy as np  # np mean, np random
 
 # Transforming Signal to Frequency Domain to Capture Value of Maximum Frequency
 
-def GetMaximumFrequencyComponent(timeReadings, amplitudeReadings):
-    magnitudes = np.abs(scipy.fft.rfft(amplitudeReadings)) / \
-        np.max(np.abs(scipy.fft.rfft(amplitudeReadings)))
-    frequencies = scipy.fft.rfftfreq(
-        len(timeReadings), (timeReadings[1] - timeReadings[0]))
-    for index, frequency in enumerate(frequencies):
-        if magnitudes[index] >= 0.05:
-            maximumFrequency = frequency
-    return round(maximumFrequency)
+
+def GetMaximumFrequencyComponent(time, amplitudes):
+
+    # abs(scipy.fft.rfft()) returns the magnitude of the amplitude of each frequency component in frequency domain
+    magnitudes = np.abs(scipy.fft.rfft(amplitudes))
+
+    # scipy.fft.rfftfrec( Window length, Sample spacing)  returns a list containing the signal frequency components
+    frequencies = scipy.fft.rfftfreq(len(time), (time[1] - time[0]))
+
+    indices = find_peaks(magnitudes)[0]  # the indices of the peaks magnitudes
+    maxfreq = 0
+    for i in range(len(indices)):
+        if (frequencies[indices[i]] > maxfreq):
+            maxfreq = frequencies[indices[i]]
+    return round(maxfreq)
 
 
 # ----------------------- Function of plotting the Signal Resampling ------------------------------
@@ -33,8 +39,33 @@ def signalSampling(Amplitude, Time, sampleFreq, timeRange):
     sampledTime = Time[::PointSteps]
     sampledAmplitude = Amplitude[::PointSteps]
 
-    return sampledAmplitude, sampledTime
+    return samplesAmplitude, samplesTime
 
+# ----------------------- Function of adding noise ------------------------------
+
+
+def addNoise(amplitudeReadings, snr_db):
+
+    #SNR = signal_Pwr_db - noise_Pwr_db
+
+    power_watt = amplitudeReadings**2
+    power_avg_watt = np.mean(power_watt)
+    power_avg_db = 10 * np.log10(power_avg_watt)
+    noise_power_avg_db = power_avg_db - snr_db
+
+    # convert P(dB) => P(watt)
+    noise_power_avg_watts = 10 ** (noise_power_avg_db / 10)
+
+    # Generate an sample of white noise
+    noise_mean = 0
+
+    noise_amplitudes = np.random.normal(
+        noise_mean, np.sqrt(noise_power_avg_watts), len(power_watt))  # random samples from a normal (Gaussian) distribution.
+
+    # adding noise to the original signal
+    signal_with_noise = amplitudeReadings + noise_amplitudes
+
+    return signal_with_noise
 
 # ----------------------- Function of Reconstructing the Signal ------------------------------
 
@@ -46,7 +77,6 @@ def signalReconstructing(time_Points, sampledTime, sampledAmplitude):
     # The following equations is according to White- Shannon interpoltion formula ((t - nT)/T)
     # Transpose for TimeMatrix is a must for proper calculations (broadcasting)
     K = (TimeMatrix.T - sampledTime) / (sampledTime[1] - sampledTime[0])
-
     # Reconstructed Amplitude = x[n] sinc(v) -- Whitetaker Shannon
     finalMatrix = sampledAmplitude * np.sinc(K)
 
@@ -80,73 +110,53 @@ def summedsignal(sig, t):
 
 # ----------------------- Function of plotting data and its reconstruction from file ------------------------------
 
-def SignalPlotting(timeReadings, amplitudeReadings, samplingRate):
+def SignalPlotting(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckBox, showAddedSignals, showReconstructedSignal, showUploadedSignal, snr_db, composedT):
 
     timeRange_max = max(timeReadings)
     timeRange_min = min(timeReadings)
     timeRange = timeRange_max - timeRange_min
 
-    sampledAmplitude, sampledTime = signalSampling(
-        amplitudeReadings, timeReadings, samplingRate, timeRange)
-
-    left_column, right_column = st.columns(2)
-
-    with left_column:
+    if(AddNoiseCheckBox):
+        signal_with_Noise = addNoise(amplitudeReadings, snr_db)
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=timeReadings, y=amplitudeReadings,
-                                 mode='lines', name='Signal Plot'))
+        fig.add_trace(go.Scatter(x=timeReadings, y=signal_with_Noise,
+                                 mode='lines', name='Signal Plot', marker_color='#0fb7bd'))
+        sampledAmplitude, sampledTime = signalSampling(
+            signal_with_Noise, timeReadings, samplingRate, timeRange)
 
-        maxF = GetMaximumFrequencyComponent(timeReadings, amplitudeReadings)
+    if(showAddedSignals):
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=composedT, y=summedsignal(composedT),
+                                 mode='lines', name='Signal Plot', marker_color='#0fb7bd'))
+        sampledAmplitude, sampledTime = signalSampling(
+            composedT, summedsignal(composedT), samplingRate, timeRange)
 
-    # Sampling points on signal
-        fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
-                                 mode='markers', name='Sampling'))
-        fig.update_xaxes(title_text="Time (s)")
-        fig.update_yaxes(title_text="Amplitude (mV)")
-        fig.update_layout(title={
-            'text': "Signal Plot",
-            'y': 0.9,
-            'x': 0.49,
-            'xanchor': 'center',
-            'yanchor': 'top'},
-            title_font=dict(
-                family="Arial",
-                size=20,
-        ))
-        st.plotly_chart(fig, use_container_width=True)
-
-    if samplingRate > 0:
-        with right_column:
-            reconstructedAmp = signalReconstructing(
-                timeReadings, sampledTime, sampledAmplitude)
-            Plotting(timeReadings, reconstructedAmp,
-                     "Reconstructed Plot", '#61c6bd')
-
-
-# ----------------------- Function of reading data from file and plotting ------------------------------
-
-def read_file(file):
-    df = pd.read_csv(file)
-    return df
-
-
-def Plotting(time, Signal, plotHeader, colorGiv):
-    Fig = go.Figure()
-    Fig.add_trace(go.Scatter(
-        x=time, y=Signal, mode='lines', marker_color=colorGiv))
-    Fig.update_xaxes(title_text="Time (s)")
-    Fig.update_yaxes(title_text="Amplitude (mV)")
-    Fig.update_layout(title={
-        'text': plotHeader,
-        'y': 0.9,
-        'x': 0.49,
-        'xanchor': 'center',
-        'yanchor': 'top'},
-        title_font=dict(
-        family="Arial",
-        size=20,
-    ))
-    st.plotly_chart(Fig, use_container_width=True)
+# Sampling points on signal
+    fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
+                             mode='markers', name='Sampling'))
+    fig.update_xaxes(title_text="Time (s)", zeroline=True,
+                     zerolinewidth=2, range=[0, timeRange_max])
+    fig.update_yaxes(title_text="Amplitude (mV)",
+                     zeroline=True, zerolinewidth=2)
+    fig.update_layout(width=800,
+                      height=800,
+                      title={
+                          'text': "Main Viewer",
+                          'y': 0.9,
+                          'x': 0.49,
+                          'xanchor': 'center',
+                          'yanchor': 'top'},
+                      title_font=dict(
+                          family="Arial",
+                          size=20,
+                      ))
+    st.plotly_chart(fig, use_container_width=True)
+    # Reconstructing the signal then plotting it
+    # reconstructedAmp = signalReconstructing(
+    #     timeReadings, sampledTime, sampledAmplitude)
+    # Plotting(timeReadings, reconstructedAmp,
+    #          "Reconstructed Plot", '#61c6bd')
+    # st.plotly_chart(fig, use_container_width=True)
 
 
 # ----------------------- Function of adding noise ------------------------------
@@ -227,3 +237,35 @@ def handle_click(name):
         indx = delsig(name)
         st.session_state.sigparameters.remove(
             st.session_state.sigparameters[indx])
+
+# ---------------------- Read the CSV file -------------------------------------------
+
+
+def read_file(file):
+    df = pd.read_csv(file)
+    return df
+
+
+# ----------------------- Function of reading data from file and plotting ------------------------------
+
+def Plotting(time, Signal, plotHeader, colorGiv,):
+    Fig = go.Figure()
+    Fig.add_trace(go.Scatter(
+        x=time, y=Signal, mode='lines', marker_color=colorGiv))
+    Fig.update_xaxes(title_text="Time (s)", zeroline=True,
+                     zerolinewidth=2, range=[0, 1])
+    Fig.update_yaxes(title_text="Amplitude (mV)",
+                     zeroline=True)
+    Fig.update_layout(width=800,
+                      height=800,
+                      title={
+                          'text': plotHeader,
+                          'y': 0.9,
+                          'x': 0.49,
+                          'xanchor': 'center',
+                          'yanchor': 'top'},
+                      title_font=dict(
+                          family="Arial",
+                          size=20,
+                      ))
+    st.plotly_chart(Fig, use_container_width=True)
