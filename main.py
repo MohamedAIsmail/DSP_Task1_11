@@ -6,6 +6,7 @@ import streamlit as st
 import Functions as fn
 import numpy as np
 from streamlit_option_menu import option_menu
+import csv
 
 
 st.set_page_config(page_title="Sampling Studio",
@@ -15,9 +16,9 @@ with open('style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 if 'sigparameters' not in st.session_state:
-    st.session_state['sigparameters'] = []
+    st.session_state['sigparameters'] = [[1, 1, 'Signal 1']]
 if 'a_count' not in st.session_state:
-    st.session_state['a_count'] = 0
+    st.session_state['a_count'] = 1
 
 
 # ---------------------- view selected signal-------------------------------------------
@@ -44,24 +45,22 @@ col1, col2, col3 = st.columns([1, 4, 0.7])
 
 
 with col1:
-    
+
     if option == 'Uploading Signal':
-        st.header(" ")
         st.header(" ")
         uploaded_Signal = st.file_uploader(
             'Upload your Signal here!')  # Upload Signal here
 
     if option == 'Generating Signal':
         st.header(" ")
-        st.header(" ")
         st.header('Adding Signal')
 # Parameters for composed signal
         composedT = []
         composedSig = []
-        composedT = np.linspace(0, 8, 1000)
+        composedT = np.linspace(0, 6, 1000)
         freq = st.number_input(
-            'Frequency', min_value=0.0, max_value=60.0, step=1.0)
-        amp = st.number_input('Amplitude', step=1.0)
+            'Frequency', min_value=0, max_value=60, step=1, value=1)
+        amp = st.number_input('Amplitude', min_value=0, step=1, value=1)
         composedSig = amp * np.sin(2 * np.pi * freq * composedT)
 
     # Button for adding signal to the session state
@@ -81,10 +80,11 @@ with col1:
             'Select a signal', slct, on_change=view_selected_signal)
 
         if (signalselect != None):
-            signal_csv = fn.download_csv_file(composedT, fn.summedsignal(
-                composedT), 'Time (s)', 'Voltage (V)')
-            st.download_button('Download Composed Signal File', signal_csv,
-                            'Composed Signal.csv')
+            signalparamters = fn.findsig(signalselect)
+            st.write('Frequency : ', signalparamters[1], ' Hz')
+            st.write('Amplitude : ', signalparamters[0], ' mV')
+
+        if (signalselect != None):
             deletesig = st.button(
                 'Delete', on_click=fn.handle_click, args=(signalselect,))
 
@@ -93,12 +93,10 @@ with col1:
 with col3:
     if option == 'Uploading Signal':
         st.header(" ")
-        st.header(" ")
         st.header('View')
-        showUploadedSignal = st.checkbox('Uploaded Signal', value=True)
         showReconstructedSignal = st.checkbox('Reconstructed Signal')
         showSamplingPoints = st.checkbox('Sampling Points')
-        ShowNoise = st.checkbox('Show Noise')
+        ShowNoise = st.checkbox('Add Noise')
         SNR = 150
         samplingRate = 1
 
@@ -106,19 +104,16 @@ with col3:
             samplingRate = st.slider('Sampling Frequency (Hz)',
                                      min_value=1, max_value=100, step=1, key='samplingFrequency')
         if (ShowNoise):
-            SNR = st.slider('SNR (dBw)', 0.01, 100.0,
-                            20.0, step=0.5, key='SNRValue')
+            SNR = st.slider('SNR (dBw)', 1, 100,
+                            20, step=1, key='SNRValue')
 
     if option == 'Generating Signal':
         # Sliders to take values of sampling frequency and SNR
         st.header(" ")
-        st.header(" ")
         st.header('View')
-        showSelectedSignal = st.checkbox('Selected Signal', value=True)
         showReconstructedSignal = st.checkbox('Reconstructed Signal')
         showSamplingPoints = st.checkbox('Sampling Points')
-        showComposedSignals = st.checkbox('Added Signals')
-        ShowNoise = st.checkbox('Show Noise')
+        ShowNoise = st.checkbox('Add Noise')
         SNR = 150
         samplingRate = 1
 
@@ -126,8 +121,8 @@ with col3:
             samplingRate = st.slider('Sampling Frequency (Hz)',
                                      min_value=1, max_value=100, step=1, key='samplingFrequency')
         if (ShowNoise):
-            SNR = st.slider('SNR (dBw)', 0.01, 100.0,
-                            20.0, step=0.5, key='SNRValue')
+            SNR = st.slider('SNR (dBw)', 1, 100,
+                            20, step=1, key='SNRValue')
 
 
 with col2:
@@ -140,36 +135,35 @@ with col2:
 
             # Reading data according to the columns and plotting them, and also reconstruct according to the sampleRate
             fn.UploadedSignal(timeReadings, ampltiudeReadings,
-                              samplingRate, ShowNoise, showReconstructedSignal, showUploadedSignal, showSamplingPoints, SNR)
+                              samplingRate, ShowNoise, showReconstructedSignal, showSamplingPoints, SNR)
         else:
             # Plotting empty plots for GUI incase there is no input
-            fn.Plotting([], [], 'Main Viewer', '#0fb7bd')
+            with open('Automated Sin Signal.csv', mode='r') as file:
+                SignalFile = fn.read_file(file)
+                timeReadings = SignalFile.iloc[:, 1].to_numpy()
+                ampltiudeReadings = SignalFile.iloc[:, 2].to_numpy()
+                fn.UploadedSignal(timeReadings, ampltiudeReadings,
+                                  samplingRate, ShowNoise, showReconstructedSignal, showSamplingPoints, SNR)
 
     if option == 'Generating Signal':
         if (st.session_state.sigparameters != []):
             signal = view_selected_signal()
             fn.GeneratedSignal(composedT, composedSig, samplingRate, ShowNoise,
-                               showReconstructedSignal, showSelectedSignal, showComposedSignals, showSamplingPoints, SNR, signal)
+                               showReconstructedSignal, showSamplingPoints, SNR, signal)
+            if (signalselect != None):
+                signal_csv = fn.download_csv_file(composedT, fn.summedsignal(
+                    composedT), 'Time (s)', 'Voltage (V)')
+                st.download_button('Download Composed Signal', signal_csv,
+                                   'Composed Signal.csv')
         else:
             st.warning("You must add signal first!")
 
 
-with col3:
+with col1:
     if option == 'Uploading Signal':
         if uploaded_Signal:
             maxFrequency = st.metric(
                 "Maximum Frequency", str(fn.GetMaximumFrequencyComponent(timeReadings, ampltiudeReadings)) + ' Hz')  # Viewing Fmax
-
-
-# # Plotting all the graphs in the Composed Signal Page
-#     fn.Plotting(t, fn.summedsignal(t) '#0fb7bd')
-
-#     with col1:
-#         fn.Plotting(t, sig '#0fb7bd')
-
-#     with col2:
-#         if (signalselect != None):
-#             fn.Plotting(t, view_selected_signal(),
-#                          '#0fb7bd')
-#         else:
-#             fn.Plotting([], [], selectedSignalText, '#0fb7bd')
+        else:
+            maxFrequency = st.metric(
+                "Maximum Frequency", str('1 Hz'))  # Viewing Fmax

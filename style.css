@@ -64,14 +64,26 @@ z-index: -1;
     margin : auto;
 }
 
+.css-16huue1{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+}
 .css-183lzff{
     font-family: Arial, Helvetica, sans-serif;
     font-size: 25px;
+    
 }
 
-.stCheckbox{
-    margin-top: 10%;
+.css-1gf0e5q{
+    font-size: 18px;
+    font-family: Arial, Helvetica, sans-serif;
 }
+
+.css-1xarl3l{
+    font-size: 23px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 
 .css-otobgn.edgvbvh9{
     position: relative;
@@ -89,4 +101,11 @@ z-index: -1;
 .css-8u98yl{
     cursor: pointer;
     
+}
+
+.css-18e3th9 {
+    padding-top: 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-bottom: 2rem;
 }

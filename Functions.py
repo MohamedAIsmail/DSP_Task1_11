@@ -1,6 +1,6 @@
 from select import select
 from time import time
-from turtle import title
+from turtle import bgcolor, title
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import streamlit as st  # 🎈 data web app development
@@ -113,7 +113,7 @@ def summedsignal(t):
 
 # ----------------------- Function of plotting data and its reconstruction from file ------------------------------
 
-def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckBox, showReconstructedSignal, showUploadedSignal, showSamplingPoints, snr_db
+def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckBox, showReconstructedSignal, showSamplingPoints, snr_db
                    ):
 
     timeRange_max = max(timeReadings)
@@ -124,23 +124,17 @@ def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
 
     fig = go.Figure()
 
-    if (showUploadedSignal):
-        fig.add_trace(go.Scatter(x=timeReadings, y=amplitudeReadings,
-                                 mode='lines', name='Signal Plot', marker_color='#0fb7bd', line=dict(width=6)))
-        sampledAmplitude, sampledTime = signalSampling(
-            amplitudeReadings, timeReadings, samplingRate, timeRange)
-
     if (AddNoiseCheckBox):
         signal_with_Noise = addNoise(amplitudeReadings, snr_db)
         fig.add_trace(go.Scatter(x=timeReadings, y=signal_with_Noise,
-                                 mode='lines', name='Noise', marker_color='#FF0EF3', line=dict(width=2.5)))
+                                 mode='lines', name='Noised', marker_color='#0784b5', line=dict(width=3)))
         sampledAmplitude, sampledTime = signalSampling(
             signal_with_Noise, timeReadings, samplingRate, timeRange)
-
-# Sampling points on signal
-    if (showSamplingPoints):
-        fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
-                                 mode='markers', name='Sampling', marker_color='red', marker=dict(size=7)))
+    else:
+        fig.add_trace(go.Scatter(x=timeReadings, y=amplitudeReadings,
+                                 mode='lines', name='Original', marker_color='#0fb7bd', line=dict(width=3)))
+        sampledAmplitude, sampledTime = signalSampling(
+            amplitudeReadings, timeReadings, samplingRate, timeRange)
 
     # Reconstructing the signal then plotting it
     reconstructedAmp = signalReconstructing(
@@ -148,13 +142,19 @@ def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
 
     if (showReconstructedSignal):
         fig.add_trace(go.Scatter(x=timeReadings, y=reconstructedAmp,
-                                 mode='lines', name='Reconstructed Signal', marker_color='#FFF01F ', line=dict(width=3)))
+                                 mode='lines', name='Reconstructed', marker_color='#FFF01F ', line=dict(width=2)))
+
+    # Sampling points on signal
+    if (showSamplingPoints):
+        fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
+                                 mode='markers', name='Sampled', marker_color='red', marker=dict(size=4)))
 
     fig.update_xaxes(zeroline=True,
-                     zerolinewidth=2, range=[0, timeRange_max])
-    fig.update_yaxes(zeroline=True, zerolinewidth=2)
+                     zerolinewidth=2, range=[0, timeRange_max], showgrid=False)
+    fig.update_yaxes(zeroline=True, zerolinewidth=2, showgrid=False)
     fig.update_layout(font=dict(size=13),
                       xaxis_title="Time (s)", yaxis_title="Amplitude (mV)",
+                      autosize=False,
                       width=1200,
                       height=600,
                       title={
@@ -172,7 +172,7 @@ def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
 
 # ----------------------- Generating SIGNAL ------------------------------
 
-def GeneratedSignal(ComposedT, ComposedSig, samplingRate, AddNoiseCheckBox, showReconstructedSignal, showSelectedSignal, showComposedSignals, showSamplingPoints, snr_db, selectedSignal
+def GeneratedSignal(ComposedT, ComposedSig, samplingRate, AddNoiseCheckBox, showReconstructedSignal, showSamplingPoints, snr_db, selectedSignal
                     ):
     timeRange_max = max(ComposedT)
     timeRange_min = min(ComposedT)
@@ -186,29 +186,24 @@ def GeneratedSignal(ComposedT, ComposedSig, samplingRate, AddNoiseCheckBox, show
     #     np.sin(2 * np.pi * st.session_state['selected signal'] * ComposedT)
 
     fig = go.Figure()
-    if (showSelectedSignal):
-        fig.add_trace(go.Scatter(x=ComposedT, y=selectedSignal,
-                                 mode='lines', name='Signal Generated', marker_color='#0fb7bd'))
-        sampledAmplitude, sampledTime = signalSampling(
-            selectedSignal, ComposedT, samplingRate, timeRange)
-
-    if (showComposedSignals):
-        fig.add_trace(go.Scatter(x=ComposedT, y=composedSignal,
-                                 mode='lines', name='Signal Summation', marker_color='#0fb7bd'))
-        sampledAmplitude, sampledTime = signalSampling(
-            composedSignal, ComposedT, samplingRate, timeRange)
 
     if (AddNoiseCheckBox):
         signal_with_Noise = addNoise(composedSignal, snr_db)
         fig.add_trace(go.Scatter(x=ComposedT, y=signal_with_Noise,
-                                 mode='lines', name='Noise', marker_color='yellow'))
+                                 mode='lines', name='Noised', marker_color='yellow'))
         sampledAmplitude, sampledTime = signalSampling(
             signal_with_Noise, ComposedT, samplingRate, timeRange)
+    else:
+        fig.add_trace(go.Scatter(x=ComposedT, y=composedSignal,
+                                 mode='lines', name='Composed', marker_color='#0fb7bd'))
+        sampledAmplitude, sampledTime = signalSampling(
+            composedSignal, ComposedT, samplingRate, timeRange)
+
 
 # Sampling points on signal
     if (showSamplingPoints):
         fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
-                                 mode='markers', name='Sampling Points', marker_color='red'))
+                                 mode='markers', name='Sampled', marker_color='red'))
 
     # Reconstructing the signal then plotting it
     reconstructedAmp = signalReconstructing(
@@ -216,14 +211,15 @@ def GeneratedSignal(ComposedT, ComposedSig, samplingRate, AddNoiseCheckBox, show
 
     if (showReconstructedSignal):
         fig.add_trace(go.Scatter(x=ComposedT, y=reconstructedAmp,
-                                 mode='lines', name='Reconstructed Signal', marker_color='green'))
+                                 mode='lines', name='Reconstructed', marker_color='green'))
 
     fig.update_xaxes(title_text="Time (s)", zeroline=True,
-                     zerolinewidth=2, range=[0, timeRange_max], title_font={"size": 20})
+                     zerolinewidth=2, range=[0, timeRange_max], title_font={"size": 20}, showgrid=False)
     fig.update_yaxes(title_text="Amplitude (mV)",
-                     zeroline=True, zerolinewidth=2, title_font={"size": 20})
+                     zeroline=True, zerolinewidth=2, title_font={"size": 20}, showgrid=False)
     fig.update_layout(width=800,
                       height=600,
+                      autosize=False,
                       font=dict(size=13),
                       xaxis_title="Time (s)", yaxis_title="Amplitude (mV)",
                       title={
@@ -287,30 +283,3 @@ def handle_click(name):
 def read_file(file):
     df = pd.read_csv(file)
     return df
-
-
-# ----------------------- Function of reading data from file and plotting ------------------------------
-
-def Plotting(time, Signal, plotHeader, colorGiv,):
-    Fig = go.Figure()
-    Fig.add_trace(go.Scatter(
-        x=time, y=Signal, mode='lines', marker_color=colorGiv))
-    Fig.update_xaxes(title_text="Time (s)", zeroline=True,
-                     zerolinewidth=2, range=[0, 1])
-    Fig.update_yaxes(title_text="Amplitude (mV)",
-                     zeroline=True)
-    Fig.update_layout(width=800,
-                      height=600,
-                      font=dict(size=13),
-                      xaxis_title="Time (s)", yaxis_title="Amplitude (mV)",
-                      title={
-                          'text': plotHeader,
-                          'y': 0.9,
-                          'x': 0.49,
-                          'xanchor': 'center',
-                          'yanchor': 'top'},
-                      title_font=dict(
-                          family="Arial",
-                          size=20,
-                      ))
-    st.plotly_chart(Fig, use_container_width=True)
