@@ -1,7 +1,3 @@
-from select import select
-from time import time
-from turtle import bgcolor, title
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import streamlit as st  # 🎈 data web app development
 import pandas as pd  # read csv, df manipulation
@@ -16,17 +12,18 @@ from scipy.signal import find_peaks
 def GetMaximumFrequencyComponent(time, amplitudes):
 
     # abs(scipy.fft.rfft()) returns the magnitude of the amplitude of each frequency component in frequency domain
-    magnitudes = np.abs(scipy.fft.rfft(amplitudes))
+    amplitude = np.abs(scipy.fft.rfft(amplitudes))
 
     # scipy.fft.rfftfrec(Window length, Sample spacing)  returns a list containing the signal frequency components
     frequencies = scipy.fft.rfftfreq(len(time), (time[1] - time[0]))
 
-    indices = find_peaks(magnitudes)[0]  # the indices of the peaks magnitudes
+    indices = find_peaks(amplitude)[0]  # the indices of the peaks magnitudes
 
     maxfreq = 0
     for i in range(len(indices)):
         if (frequencies[indices[i]] > maxfreq):
             maxfreq = frequencies[indices[i]]
+
     return round(maxfreq)
 
 
@@ -47,9 +44,9 @@ def signalSampling(Amplitude, Time, sampleFreq, timeRange):
 # ----------------------- Function of adding noise ------------------------------
 
 
-def addNoise(amplitudeReadings, snr_db):
+def addNoise(signalAmplitude, snr_db):
 
-    power_watt = amplitudeReadings**2
+    power_watt = signalAmplitude**2
     power_avg_watt = np.mean(power_watt)
     power_avg_db = 10 * np.log10(power_avg_watt)
     noise_power_avg_db = power_avg_db - snr_db
@@ -64,7 +61,7 @@ def addNoise(amplitudeReadings, snr_db):
         noise_mean, np.sqrt(noise_power_avg_watts), len(power_watt))  # random samples from a normal (Gaussian) distribution.
 
     # adding noise to the original signal
-    signal_with_noise = amplitudeReadings + noise_amplitudes
+    signal_with_noise = signalAmplitude + noise_amplitudes
 
     return signal_with_noise
 
@@ -78,24 +75,16 @@ def signalReconstructing(time_Points, sampledTime, sampledAmplitude):
 
     # The following equations is according to White- Shannon interpoltion formula ((t - nT)/T)
     # Transpose for TimeMatrix is a must for proper calculations (broadcasting)
-    K = (TimeMatrix.T - sampledTime) / (sampledTime[1] - sampledTime[0])
+    interpolation_Formula = (TimeMatrix.T - sampledTime) / \
+        (sampledTime[1] - sampledTime[0])
+
     # Reconstructed Amplitude = x[n] sinc(v) -- Whitetaker Shannon
-    finalMatrix = sampledAmplitude * np.sinc(K)
+    finalMatrix = sampledAmplitude * np.sinc(interpolation_Formula)
 
     # Summation of columns of the final matrix to get an array of reconstructed points
-    ReconstructedSignal = np.sum(finalMatrix, axis=1)
+    reconstructedSignal = np.sum(finalMatrix, axis=1)
 
-    return ReconstructedSignal
-
-
-# ----------------------- Function of plotting the composed signal ------------------------------
-
-def signalcomposer(sig, t):
-    # plotanysig(t,sig,'the composed signal')
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=t, y=sig,
-                             mode='lines'))
-    st.plotly_chart(fig)
+    return reconstructedSignal
 
 
 # ----------------------- Function of plotting the summed signal ------------------------------
@@ -119,8 +108,6 @@ def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
     timeRange_max = max(timeReadings)
     timeRange_min = min(timeReadings)
     timeRange = timeRange_max - timeRange_min
-    sampledAmplitude, sampledTime = signalSampling(
-        amplitudeReadings, timeReadings, samplingRate, timeRange)
 
     fig = go.Figure()
 
@@ -139,6 +126,8 @@ def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
     # Reconstructing the signal then plotting it
     reconstructedAmp = signalReconstructing(
         timeReadings, sampledTime, sampledAmplitude)
+    reconstructdesignal_csv = download_csv_file(
+        timeReadings, reconstructedAmp, 'Time (s)', 'Voltage (V)')
 
     if (showReconstructedSignal):
         fig.add_trace(go.Scatter(x=timeReadings, y=reconstructedAmp,
@@ -149,9 +138,8 @@ def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
         fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
                                  mode='markers', name='Sampled', marker_color='red', marker=dict(size=4)))
 
-    fig.update_xaxes(zeroline=True,
-                     zerolinewidth=2, range=[0, timeRange_max], showgrid=False)
-    fig.update_yaxes(zeroline=True, zerolinewidth=2, showgrid=False)
+    fig.update_xaxes(range=[0, timeRange_max], showgrid=False)
+    fig.update_yaxes(showgrid=False)
     fig.update_layout(font=dict(size=13),
                       xaxis_title="Time (s)", yaxis_title="Amplitude (mV)",
                       autosize=False,
@@ -169,21 +157,18 @@ def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
     ))
     st.plotly_chart(fig, use_container_width=True)
 
+    return reconstructdesignal_csv
 
 # ----------------------- Generating SIGNAL ------------------------------
 
-def GeneratedSignal(ComposedT, ComposedSig, samplingRate, AddNoiseCheckBox, showReconstructedSignal, showSamplingPoints, snr_db, selectedSignal
+
+def GeneratedSignal(ComposedT, samplingRate, AddNoiseCheckBox, showReconstructedSignal, showSamplingPoints, snr_db
                     ):
     timeRange_max = max(ComposedT)
     timeRange_min = min(ComposedT)
     timeRange = timeRange_max - timeRange_min
 
-    sampledAmplitude, sampledTime = signalSampling(
-        ComposedSig, ComposedT, samplingRate, timeRange)
-
     composedSignal = summedsignal(ComposedT)
-    # selectedSignal = st.session_state['selected signal'][0] * \
-    #     np.sin(2 * np.pi * st.session_state['selected signal'] * ComposedT)
 
     fig = go.Figure()
 
@@ -199,12 +184,6 @@ def GeneratedSignal(ComposedT, ComposedSig, samplingRate, AddNoiseCheckBox, show
         sampledAmplitude, sampledTime = signalSampling(
             composedSignal, ComposedT, samplingRate, timeRange)
 
-
-# Sampling points on signal
-    if (showSamplingPoints):
-        fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
-                                 mode='markers', name='Sampled', marker_color='red'))
-
     # Reconstructing the signal then plotting it
     reconstructedAmp = signalReconstructing(
         ComposedT, sampledTime, sampledAmplitude)
@@ -213,10 +192,13 @@ def GeneratedSignal(ComposedT, ComposedSig, samplingRate, AddNoiseCheckBox, show
         fig.add_trace(go.Scatter(x=ComposedT, y=reconstructedAmp,
                                  mode='lines', name='Reconstructed', marker_color='green'))
 
-    fig.update_xaxes(title_text="Time (s)", zeroline=True,
-                     zerolinewidth=2, range=[0, timeRange_max], title_font={"size": 20}, showgrid=False)
-    fig.update_yaxes(title_text="Amplitude (mV)",
-                     zeroline=True, zerolinewidth=2, title_font={"size": 20}, showgrid=False)
+    # Sampling points on signal
+    if (showSamplingPoints):
+        fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
+                                 mode='markers', name='Sampled', marker_color='red'))
+
+    fig.update_xaxes(range=[0, timeRange_max], showgrid=False)
+    fig.update_yaxes(showgrid=False)
     fig.update_layout(width=800,
                       height=600,
                       autosize=False,
