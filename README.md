@@ -23,3 +23,4 @@ As a **User** you can
 
 
 ## Preview
+![](https://github.com/MohamedAIsmail/DSP_Task1_11/blob/main/SamplingStudio.gif)
