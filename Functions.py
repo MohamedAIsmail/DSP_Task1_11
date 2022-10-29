@@ -142,6 +142,7 @@ def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
     fig.update_yaxes(showgrid=False)
     fig.update_layout(font=dict(size=13),
                       xaxis_title="Time (s)", yaxis_title="Amplitude (mV)",
+                      showlegend=True,
                       autosize=False,
                       width=1200,
                       height=600,
@@ -201,6 +202,7 @@ def GeneratedSignal(ComposedT, samplingRate, AddNoiseCheckBox, showReconstructed
     fig.update_yaxes(showgrid=False)
     fig.update_layout(width=800,
                       height=600,
+                      showlegend=True,
                       autosize=False,
                       font=dict(size=13),
                       xaxis_title="Time (s)", yaxis_title="Amplitude (mV)",
