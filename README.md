@@ -36,4 +36,4 @@ Digital Signal Processing (SBE3110) class project created by:
 
 - Dr. Tamer Basha & Eng. Mohamed Mostafa
 
-All rights reserved © 2022 to Team 11 - Systems & Biomedical Engineering, Cairo University (Class 2024)
+All rights reserved © 2022 to our Team - Systems & Biomedical Engineering, Cairo University (Class 2024)
