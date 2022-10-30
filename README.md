@@ -23,4 +23,17 @@ As a **User** you can
 
 
 ## Preview
-![](https://github.com/MohamedAIsmail/DSP_Task1_11/blob/main/SamplingStudio.gif)
+![](https://github.com/MohamedAIsmail/DSP_Task1_11/blob/main/SamplingStudio-Final.gif)
+
+## Task info & Team
+Digital Signal Processing (SBE3110) class project created by:
+
+- Mohamed Ahmed Ismail
+- Maha Medhat
+- Mahmoud Zakaria
+
+### Submitted to:
+
+- Dr. Tamer Basha & Eng. Mohamed Mostafa
+
+All rights reserved © 2022 to Team 11 - Systems & Biomedical Engineering, Cairo University (Class 2024)
