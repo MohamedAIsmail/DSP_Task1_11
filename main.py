@@ -20,8 +20,8 @@ option = option_menu(None, ['Uploading Signal', "Generating Signal"],
                      icons=['file-earmark-plus', "plus-circle"], default_index=0, orientation="horizontal",
                      styles={
     "container": {"padding": "0!important"},
-    "icon": {"font-size": "25px"},
-    "nav-link": {"font-size": "25px", "text-align": "center", "margin": "0px", "--hover-color": "#0fb7bd", 'font-family': 'Arial, Helvetica, sans-serif'
+    "icon": {"font-size": "18px"},
+    "nav-link": {"font-size": "18px", "text-align": "center", "margin": "0px", "--hover-color": "#0fb7bd", 'font-family': 'Arial, Helvetica, sans-serif'
                  },
     "nav-link-selected": {},
 }
@@ -39,7 +39,7 @@ with col1:
 
     if option == 'Generating Signal':
         st.header(" ")
-        st.header('Adding Signal')
+        st.header('Compose Signal')
 
 # Parameters for composed signal
         composedT = np.linspace(0, 6, 1000)
