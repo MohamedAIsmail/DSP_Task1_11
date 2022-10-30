@@ -16,87 +16,97 @@ if 'sigparameters' not in st.session_state:
 if 'a_count' not in st.session_state:
     st.session_state['a_count'] = 1
 
-option = option_menu(
-    None, ["Uploading Signal", 'Generating Signal'], orientation="horizontal", default_index=0)
+option = option_menu(None, ['Uploading Signal', "Generating Signal"],
+                     icons=['file-earmark-plus', "plus-circle"], default_index=0, orientation="horizontal",
+                     styles={
+    "container": {"padding": "0!important"},
+    "icon": {"font-size": "25px"},
+    "nav-link": {"font-size": "25px", "text-align": "center", "margin": "0px", "--hover-color": "#0fb7bd", 'font-family': 'Arial, Helvetica, sans-serif'
+                 },
+    "nav-link-selected": {},
+}
+)
 
-col1, col2, col3 = st.columns([1, 4, 0.7])
+col1, col2, col3 = st.columns([1, 5, 1])
 
-with st.container():
-    with col1:
-        if option == 'Uploading Signal':
-            st.header(" ")
-            uploaded_Signal = st.file_uploader(
-                'Upload your Signal here!')  # Upload Signal here
 
-        if option == 'Generating Signal':
-            st.header(" ")
-            st.header('Adding Signal')
+with col1:
+    if option == 'Uploading Signal':
+        st.header("")
+        uploaded_Signal = st.file_uploader(
+            'Upload your signal')  # Upload Signal here
+        st.markdown("---")
 
-    # Parameters for composed signal
-            composedT = np.linspace(0, 6, 1000)
-            freq = st.number_input(
-                'Frequency', min_value=0, max_value=60, step=1, value=1)
-            amp = st.number_input('Amplitude', min_value=0, step=1, value=1)
+    if option == 'Generating Signal':
+        st.header(" ")
+        st.header('Adding Signal')
 
-    # Button for adding signal to the session state
-            addsig = st.button('Add Signal')
-            if (addsig):
-                st.session_state.a_count += 1
-                name = 'Signal ' + str(st.session_state.a_count)
-                signal = [amp, freq, name]
-                st.session_state.sigparameters.append(signal)
+# Parameters for composed signal
+        composedT = np.linspace(0, 6, 1000)
+        freq = st.number_input(
+            'Frequency', min_value=0, max_value=60, step=1, value=1)
+        amp = st.number_input('Amplitude', min_value=0, step=1, value=1)
 
-            slct = []
-            for i in range(len(st.session_state.sigparameters)):
-                slct.append(st.session_state.sigparameters[i][2])
+# Button for adding signal to the session state
+        addsig = st.button('Add')
+        if (addsig):
+            st.session_state.a_count += 1
+            name = 'Signal ' + str(st.session_state.a_count)
+            signal = [amp, freq, name]
+            st.session_state.sigparameters.append(signal)
 
-        # Select box for selecting the signal to view it and delete it
-            signalselect = st.selectbox(
-                'Select a signal', slct)
+        slct = []
+        for i in range(len(st.session_state.sigparameters)):
+            slct.append(st.session_state.sigparameters[i][2])
 
-            if (signalselect != None):
-                signalparamters = fn.findsig(signalselect)
-                st.write('Frequency : ', signalparamters[1], ' Hz')
-                st.write('Amplitude : ', signalparamters[0], ' mV')
-                deletesig = st.button(
-                    'Delete', on_click=fn.handle_click, args=(signalselect,))
+    # Select box for selecting the signal to view it and delete it
+        signalselect = st.selectbox(
+            'Select a signal', slct)
+
+        if (signalselect != None):
+            signalparamters = fn.findsig(signalselect)
+            st.write('Frequency : ', signalparamters[1], ' Hz')
+            st.write('Amplitude : ', signalparamters[0], ' mV')
+            deletesig = st.button(
+                'Delete', on_click=fn.handle_click, args=(signalselect,))
 
 
 #####################################################################################################
-with st.container():
-    with col3:
-        if option == 'Uploading Signal':
-            st.header(" ")
-            st.header('View')
-            showReconstructedSignal = st.checkbox('Reconstructed Signal')
-            showSamplingPoints = st.checkbox('Sampling Points')
-            ShowNoise = st.checkbox('Add Noise')
-            SNR = 150
-            samplingRate = 1
+with col3:
+    if option == 'Uploading Signal':
+        st.header('')
+        st.header('View')
+        st.header('')
+        showReconstructedSignal = st.checkbox('Reconstructed Signal')
+        showSamplingPoints = st.checkbox('Sampling Points')
+        ShowNoise = st.checkbox('Add Noise')
+        SNR = 150
+        samplingRate = 1
 
-            if (showReconstructedSignal or showSamplingPoints):
-                samplingRate = st.slider('Sampling Frequency (Hz)',
-                                        min_value=1, max_value=100, step=1, key='samplingFrequency')
-            if (ShowNoise):
-                SNR = st.slider('SNR (dBw)', 1, 100,
-                                20, step=1, key='SNRValue')
+        if (showReconstructedSignal or showSamplingPoints):
+            samplingRate = st.slider('Sampling Frequency (Hz)',
+                                     min_value=1, max_value=100, step=1, key='samplingFrequency')
+        if (ShowNoise):
+            SNR = st.slider('SNR (dBw)', 1, 100,
+                            20, step=1, key='SNRValue')
 
-        if option == 'Generating Signal':
-            # Sliders to take values of sampling frequency and SNR
-            st.header(" ")
-            st.header('View')
-            showReconstructedSignal = st.checkbox('Reconstructed Signal')
-            showSamplingPoints = st.checkbox('Sampling Points')
-            ShowNoise = st.checkbox('Add Noise')
-            SNR = 150
-            samplingRate = 1
+    if option == 'Generating Signal':
+        # Sliders to take values of sampling frequency and SNR
+        st.header(" ")
+        st.header('View')
+        st.header('')
+        showReconstructedSignal = st.checkbox('Reconstructed Signal')
+        showSamplingPoints = st.checkbox('Sampling Points')
+        ShowNoise = st.checkbox('Add Noise')
+        SNR = 150
+        samplingRate = 1
 
-            if (showReconstructedSignal or showSamplingPoints):
-                samplingRate = st.slider('Sampling Frequency (Hz)',
-                                        min_value=1, max_value=100, step=1, key='samplingFrequency')
-            if (ShowNoise):
-                SNR = st.slider('SNR (dBw)', 1, 100,
-                                20, step=1, key='SNRValue')
+        if (showReconstructedSignal or showSamplingPoints):
+            samplingRate = st.slider('Sampling Frequency (Hz)',
+                                     min_value=1, max_value=100, step=1, key='samplingFrequency')
+        if (ShowNoise):
+            SNR = st.slider('SNR (dBw)', 1, 100,
+                            20, step=1, key='SNRValue')
 
 
 with col2:
