@@ -109,3 +109,11 @@ z-index: -1;
     padding-right: 1rem;
     padding-bottom: 2rem;
 }
+
+code {
+    color: rgb(255, 255, 255);
+    overflow-wrap: break-word;
+    background: rgb(3, 3, 3);
+    font-size: 12;
+    font-family: Arial, Helvetica, sans-serif;
+}

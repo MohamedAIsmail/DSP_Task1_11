@@ -11,31 +11,30 @@ from scipy.signal import find_peaks
 
 def GetMaximumFrequencyComponent(time, amplitudes):
 
-    # abs(scipy.fft.rfft()) returns the magnitude of the amplitude of each frequency component in frequency domain
-    amplitude = np.abs(scipy.fft.rfft(amplitudes))
+    magnitudes = np.abs(scipy.fft.rfft(amplitudes)) / \
+        np.max(np.abs(scipy.fft.rfft(amplitudes)))
 
-    # scipy.fft.rfftfrec(Window length, Sample spacing)  returns a list containing the signal frequency components
-    frequencies = scipy.fft.rfftfreq(len(time), (time[1] - time[0]))
+    frequencies = scipy.fft.rfftfreq(
+        len(time), (time[1] - time[0]))
 
-    indices = find_peaks(amplitude)[0]  # the indices of the peaks magnitudes
+    for index, frequency in enumerate(frequencies):
+        if magnitudes[index] >= 0.05:
+            maximumFrequency = frequency
 
-    maxfreq = 0
-    for i in range(len(indices)):
-        if (frequencies[indices[i]] > maxfreq):
-            maxfreq = frequencies[indices[i]]
+    return round(maximumFrequency)
 
-    return round(maxfreq)
+# ----------------------- Function of the Signal Resampling ------------------------------
 
-
-# ----------------------- Function of plotting the Signal Resampling ------------------------------
 
 def signalSampling(Amplitude, Time, sampleFreq, timeRange):
 
+    # calculating the steps in points between a sampling point and another
     PointSteps = int((len(Time)/timeRange)/(sampleFreq))
 
     if PointSteps == 0:
         PointSteps = 1
 
+    # sampledTime list contains the time points that we took samples at
     sampledTime = Time[::PointSteps]
     sampledAmplitude = Amplitude[::PointSteps]
 
@@ -73,7 +72,7 @@ def signalReconstructing(time_Points, sampledTime, sampledAmplitude):
     # Matrix containing all Timepoints
     TimeMatrix = np.resize(time_Points, (len(sampledTime), len(time_Points)))
 
-    # The following equations is according to White- Shannon interpoltion formula ((t - nT)/T)
+    # The following equations is according to White - Shannon interpoltion formula ((t - nT)/T)
     # Transpose for TimeMatrix is a must for proper calculations (broadcasting)
     interpolation_Formula = (TimeMatrix.T - sampledTime) / \
         (sampledTime[1] - sampledTime[0])
@@ -126,8 +125,6 @@ def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
     # Reconstructing the signal then plotting it
     reconstructedAmp = signalReconstructing(
         timeReadings, sampledTime, sampledAmplitude)
-    reconstructdesignal_csv = download_csv_file(
-        timeReadings, reconstructedAmp, 'Time (s)', 'Voltage (V)')
 
     if (showReconstructedSignal):
         fig.add_trace(go.Scatter(x=timeReadings, y=reconstructedAmp,
@@ -158,6 +155,9 @@ def UploadedSignal(timeReadings, amplitudeReadings, samplingRate, AddNoiseCheckB
     ))
     st.plotly_chart(fig, use_container_width=True)
 
+    reconstructdesignal_csv = download_csv_file(
+        timeReadings, reconstructedAmp, 'Time (s)', 'Voltage (V)')
+
     return reconstructdesignal_csv
 
 # ----------------------- Generating SIGNAL ------------------------------
@@ -176,12 +176,12 @@ def GeneratedSignal(ComposedT, samplingRate, AddNoiseCheckBox, showReconstructed
     if (AddNoiseCheckBox):
         signal_with_Noise = addNoise(composedSignal, snr_db)
         fig.add_trace(go.Scatter(x=ComposedT, y=signal_with_Noise,
-                                 mode='lines', name='Noised', marker_color='yellow'))
+                                 mode='lines', name='Noised', marker_color='#0784b5', line=dict(width=3)))
         sampledAmplitude, sampledTime = signalSampling(
             signal_with_Noise, ComposedT, samplingRate, timeRange)
     else:
         fig.add_trace(go.Scatter(x=ComposedT, y=composedSignal,
-                                 mode='lines', name='Composed', marker_color='#0fb7bd'))
+                                 mode='lines', name='Composed', marker_color='#0fb7bd', line=dict(width=3)))
         sampledAmplitude, sampledTime = signalSampling(
             composedSignal, ComposedT, samplingRate, timeRange)
 
@@ -191,12 +191,12 @@ def GeneratedSignal(ComposedT, samplingRate, AddNoiseCheckBox, showReconstructed
 
     if (showReconstructedSignal):
         fig.add_trace(go.Scatter(x=ComposedT, y=reconstructedAmp,
-                                 mode='lines', name='Reconstructed', marker_color='green'))
+                                 mode='lines', name='Reconstructed', marker_color='#FFF01F', line=dict(width=2)))
 
     # Sampling points on signal
     if (showSamplingPoints):
         fig.add_trace(go.Scatter(x=sampledTime, y=sampledAmplitude,
-                                 mode='markers', name='Sampled', marker_color='red'))
+                                 mode='markers', name='Sampled', marker_color='red', marker=dict(size=4)))
 
     fig.update_xaxes(range=[0, timeRange_max], showgrid=False)
     fig.update_yaxes(showgrid=False)
