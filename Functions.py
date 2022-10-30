@@ -11,9 +11,11 @@ from scipy.signal import find_peaks
 
 def GetMaximumFrequencyComponent(time, amplitudes):
 
+    # abs(scipy.fft.rfft()) returns the magnitude of the amplitude of each frequency component in frequency domain
     magnitudes = np.abs(scipy.fft.rfft(amplitudes)) / \
         np.max(np.abs(scipy.fft.rfft(amplitudes)))
 
+    # scipy.fft.rfftfreq(Window length, Sample spacing)  returns a list containing the signal frequency components
     frequencies = scipy.fft.rfftfreq(
         len(time), (time[1] - time[0]))
 

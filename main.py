@@ -19,7 +19,6 @@ if 'a_count' not in st.session_state:
 option = option_menu(None, ['Uploading Signal', "Generating Signal"],
                      icons=['file-earmark-plus', "plus-circle"], default_index=0, orientation="horizontal",
                      styles={
-    "container": {"padding": "0!important"},
     "icon": {"font-size": "18px"},
     "nav-link": {"font-size": "18px", "text-align": "center", "margin": "0px", "--hover-color": "#0fb7bd", 'font-family': 'Arial, Helvetica, sans-serif'
                  },
@@ -55,7 +54,7 @@ with col1:
             signal = [amp, freq, name]
             st.session_state.sigparameters.append(signal)
 
-        slct = []
+        slct = []   # contain the names of all added signals
         for i in range(len(st.session_state.sigparameters)):
             slct.append(st.session_state.sigparameters[i][2])
 
