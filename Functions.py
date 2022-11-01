@@ -46,7 +46,6 @@ def signalSampling(Amplitude, Time, sampleFreq, timeRange):
 
 
 def addNoise(signalAmplitude, snr_db):
-
     power_watt = signalAmplitude**2
     power_avg_watt = np.mean(power_watt)
     power_avg_db = 10 * np.log10(power_avg_watt)
@@ -69,10 +68,10 @@ def addNoise(signalAmplitude, snr_db):
 # ----------------------- Function of Reconstructing the Signal ------------------------------
 
 
-def signalReconstructing(time_Points, sampledTime, sampledAmplitude):
+def signalReconstructing(timeReadings, sampledTime, sampledAmplitude):
 
     # Matrix containing all Timepoints
-    TimeMatrix = np.resize(time_Points, (len(sampledTime), len(time_Points)))
+    TimeMatrix = np.resize(timeReadings, (len(sampledTime), len(timeReadings)))
 
     # The following equations is according to White - Shannon interpoltion formula ((t - nT)/T)
     # Transpose for TimeMatrix is a must for proper calculations (broadcasting)
@@ -84,7 +83,7 @@ def signalReconstructing(time_Points, sampledTime, sampledAmplitude):
 
     # Summation of columns of the final matrix to get an array of reconstructed points
     reconstructedSignal = np.sum(finalMatrix, axis=1)
-
+    st.write(reconstructedSignal)
     return reconstructedSignal
 
 

@@ -72,41 +72,21 @@ with col1:
 
 #####################################################################################################
 with col3:
-    if option == 'Uploading Signal':
-        st.header('')
-        st.header('View')
-        st.header('')
-        showReconstructedSignal = st.checkbox('Reconstructed Signal')
-        showSamplingPoints = st.checkbox('Sampling Points')
-        ShowNoise = st.checkbox('Add Noise')
-        SNR = 150
-        samplingRate = 1
+    st.header('')
+    st.header('View')
+    st.header('')
+    showReconstructedSignal = st.checkbox('Reconstructed Signal')
+    showSamplingPoints = st.checkbox('Sampling Points')
+    ShowNoise = st.checkbox('Add Noise')
+    SNR = 150
+    samplingRate = 1
 
-        if (showReconstructedSignal or showSamplingPoints):
-            samplingRate = st.slider('Sampling Frequency (Hz)',
-                                     min_value=1, max_value=100, step=1, key='samplingFrequency')
-        if (ShowNoise):
-            SNR = st.slider('SNR (dBw)', 1, 100,
-                            20, step=1, key='SNRValue')
-
-    if option == 'Generating Signal':
-        # Sliders to take values of sampling frequency and SNR
-        st.header(" ")
-        st.header('View')
-        st.header('')
-        showReconstructedSignal = st.checkbox('Reconstructed Signal')
-        showSamplingPoints = st.checkbox('Sampling Points')
-        ShowNoise = st.checkbox('Add Noise')
-        SNR = 150
-        samplingRate = 1
-
-        if (showReconstructedSignal or showSamplingPoints):
-            samplingRate = st.slider('Sampling Frequency (Hz)',
-                                     min_value=1, max_value=100, step=1, key='samplingFrequency')
-        if (ShowNoise):
-            SNR = st.slider('SNR (dBw)', 1, 100,
-                            20, step=1, key='SNRValue')
-
+    if (showReconstructedSignal or showSamplingPoints):
+        samplingRate = st.slider('Sampling Frequency (Hz)',
+                                 min_value=1, max_value=100, step=1, key='samplingFrequency')
+    if (ShowNoise):
+        SNR = st.slider('SNR (dBw)', 1, 100,
+                        20, step=1, key='SNRValue')
 
 with col2:
     if option == 'Uploading Signal':
