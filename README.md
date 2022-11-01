@@ -28,9 +28,9 @@ As a **User** you can
 ## Task info & Team
 Digital Signal Processing (SBE3110) class project created by:
 
-- Mohamed Ahmed Ismail
-- Maha Medhat
-- Mahmoud Zakaria
+- Mohamed Ahmed Ismail Sec: 2 BN: 16
+- Maha Medhat Sec: 2 BN: 38
+- Mahmoud Zakaria Sec: 2 BN: 26
 
 ### Submitted to:
 
